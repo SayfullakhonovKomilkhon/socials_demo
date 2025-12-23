@@ -46,7 +46,7 @@ const inputStyles = css<{ $hasError?: boolean; $hasIcon?: boolean }>`
   &:focus {
     border-color: ${({ theme, $hasError }) => 
       $hasError ? theme.colors.error : theme.colors.accent.gold};
-    box-shadow: 0 0 0 3px ${({ theme, $hasError }) => 
+    box-shadow: 0 0 0 3px ${({ $hasError }) => 
       $hasError ? 'rgba(184, 80, 80, 0.1)' : 'rgba(201, 168, 108, 0.15)'};
   }
   

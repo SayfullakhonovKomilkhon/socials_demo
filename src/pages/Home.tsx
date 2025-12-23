@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, ChefHat, Heart, Gift, Star, ChevronLeft, ChevronRight } from 'lucide-react'
-import { Button } from '../components/ui'
+import { LinkButton } from '../components/ui'
 
 // Hero Section
 const HeroSection = styled.section`
@@ -967,12 +967,12 @@ export const Home: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              <Button as={Link} to="/menu" variant="gold" size="lg">
+              <LinkButton to="/menu" variant="gold" size="lg">
                 Смотреть меню
-              </Button>
-              <Button as={Link} to="/reservation" variant="outline" size="lg" style={{ borderColor: 'white', color: 'white' }}>
+              </LinkButton>
+              <LinkButton to="/reservation" variant="outline" size="lg" style={{ borderColor: 'white', color: 'white' }}>
                 Забронировать
-              </Button>
+              </LinkButton>
             </HeroButtons>
           </HeroContent>
           

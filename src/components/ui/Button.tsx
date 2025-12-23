@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components'
-import { motion } from 'framer-motion'
+import { motion, HTMLMotionProps } from 'framer-motion'
 import { Link } from 'react-router-dom'
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'gold'
@@ -133,7 +133,7 @@ export const StyledLinkButton = styled(Link)<BaseButtonProps>`
   ${baseStyles}
 `
 
-interface ButtonProps extends BaseButtonProps, React.ButtonHTMLAttributes<HTMLButtonElement> {
+type ButtonProps = BaseButtonProps & Omit<HTMLMotionProps<'button'>, keyof BaseButtonProps> & {
   children: React.ReactNode
 }
 
@@ -141,12 +141,16 @@ export const Button: React.FC<ButtonProps> = ({
   children, 
   variant = 'primary',
   size = 'md',
+  fullWidth,
+  isLoading,
   ...props 
 }) => {
   return (
     <StyledButton
       variant={variant}
       size={size}
+      fullWidth={fullWidth}
+      isLoading={isLoading}
       whileTap={{ scale: 0.98 }}
       {...props}
     >

@@ -453,6 +453,18 @@ const CategoryImageWrapper = styled.div`
   margin-bottom: 24px;
   box-shadow: 0 15px 40px rgba(74, 44, 52, 0.2);
   transition: all 0.4s ease;
+  background: linear-gradient(135deg, #f5ebe6 0%, #e8ddd5 100%);
+  
+  &::after {
+    content: '✦';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 50px;
+    color: #d4c4bc;
+    z-index: 0;
+  }
   
   &:hover {
     transform: translateY(-10px);
@@ -519,9 +531,10 @@ const SlideButton = styled.div`
   opacity: 0;
   transition: all 0.4s ease;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  z-index: 10;
   
   &::before {
-    content: '?';
+    content: '→';
     font-size: 24px;
     color: #4a2c34;
   }
@@ -660,6 +673,23 @@ const PromoImageFrame = styled.div`
 const PromoImage = styled.div`
   position: relative;
   z-index: 1;
+  background: linear-gradient(135deg, #f5ebe6 0%, #e8ddd5 100%);
+  border-radius: 25px;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &::after {
+    content: '✦';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 50px;
+    color: #d4c4bc;
+    z-index: 0;
+  }
   
   img {
     width: 100%;
@@ -668,6 +698,8 @@ const PromoImage = styled.div`
     box-shadow: 0 20px 50px rgba(74, 44, 52, 0.25);
     display: block;
     margin: 0 auto;
+    position: relative;
+    z-index: 1;
   }
 `
 
@@ -984,6 +1016,7 @@ export const Home: React.FC = () => {
             <img 
               src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=600" 
               alt="Праздничный торт"
+              onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
             />
             <FloatingBadge 
               className="top-left"
@@ -1064,6 +1097,7 @@ export const Home: React.FC = () => {
                     <img 
                       src={promoSlides[currentSlide].image} 
                       alt={promoSlides[currentSlide].title}
+                      onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
                     />
                   </PromoImage>
                 </PromoImageFrame>
@@ -1141,7 +1175,12 @@ export const Home: React.FC = () => {
                 onClick={() => handleCategoryClick(category.slug)}
               >
                 <CategoryImageWrapper>
-                  <img src={category.image} alt={category.name} loading="lazy" />
+                  <img 
+                    src={category.image} 
+                    alt={category.name} 
+                    loading="lazy"
+                    onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
+                  />
                   <SlideOverlay className="slide-overlay" />
                   <SlideButton className="slide-button" />
                 </CategoryImageWrapper>

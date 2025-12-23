@@ -94,6 +94,18 @@ const ProductImageContainer = styled.div`
   border-radius: 30px;
   box-shadow: 0 15px 40px rgba(74, 44, 52, 0.25);
   transition: transform 0.5s ease;
+  background: linear-gradient(135deg, #f5ebe6 0%, #e8ddd5 100%);
+  
+  &::after {
+    content: '✦';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 50px;
+    color: #d4c4bc;
+    z-index: 0;
+  }
   
   &::before {
     content: '';
@@ -228,7 +240,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     >
       <ProductImageContainer className="product-image-container">
         <ProductImage>
-          <img src={image} alt={name} loading="lazy" />
+          <img 
+            src={image} 
+            alt={name} 
+            loading="lazy"
+            onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
+          />
         </ProductImage>
         <ProductOverlay className="product-overlay" />
         <ViewButton className="view-btn" />

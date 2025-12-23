@@ -358,6 +358,18 @@ const ProductImageWrapper = styled.div`
   position: relative;
   aspect-ratio: 4/3;
   overflow: hidden;
+  background: linear-gradient(135deg, #f5ebe6 0%, #e8ddd5 100%);
+  
+  &::before {
+    content: '✦';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 40px;
+    color: #d4c4bc;
+    z-index: 0;
+  }
 `
 
 const ProductImage = styled.img`
@@ -365,6 +377,13 @@ const ProductImage = styled.img`
   height: 100%;
   object-fit: cover;
   transition: transform 0.6s ease;
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(135deg, #f5ebe6 0%, #e8ddd5 100%);
+  
+  &[data-error="true"] {
+    visibility: hidden;
+  }
 `
 
 const ProductOverlay = styled.div`
@@ -378,6 +397,7 @@ const ProductOverlay = styled.div`
     rgba(74, 44, 52, 0.4) 100%
   );
   pointer-events: none;
+  z-index: 2;
 `
 
 const ActionButtons = styled.div`
@@ -390,6 +410,7 @@ const ActionButtons = styled.div`
   opacity: 0;
   transition: all 0.4s ease;
   pointer-events: auto;
+  z-index: 10;
 `
 
 const ActionButtonsContainer = styled.div`
@@ -1214,7 +1235,12 @@ export const Menu: React.FC = () => {
                       <CardFrame className="card-frame">
                         <CardInner className="card-inner">
                           <ProductImageWrapper className="card-image">
-                            <ProductImage src={product.image} alt={product.name} loading="lazy" />
+                            <ProductImage 
+                              src={product.image} 
+                              alt={product.name} 
+                              loading="lazy"
+                              onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
+                            />
                             <ProductOverlay />
                             <ActionButtons className="action-buttons">
                               <ActionButtonsContainer>
@@ -1275,7 +1301,12 @@ export const Menu: React.FC = () => {
                     <CardFrame className="card-frame">
                       <CardInner className="card-inner">
                         <ProductImageWrapper className="card-image">
-                          <ProductImage src={product.image} alt={product.name} loading="lazy" />
+                          <ProductImage 
+                            src={product.image} 
+                            alt={product.name} 
+                            loading="lazy"
+                            onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
+                          />
                           <ProductOverlay />
                           <ActionButtons className="action-buttons">
                             <ActionButtonsContainer>

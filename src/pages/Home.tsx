@@ -219,35 +219,6 @@ const FeaturesSectionContainer = styled.div`
   margin: 0 auto;
 `
 
-const SectionContainer = styled.div`
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 0 ${({ theme }) => theme.spacing.xl};
-`
-
-const SectionHeader = styled.div`
-  text-align: center;
-  margin-bottom: ${({ theme }) => theme.spacing['3xl']};
-`
-
-const SectionTitle = styled(motion.h2)`
-  font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: ${({ theme }) => theme.fontSizes['4xl']};
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: ${({ theme }) => theme.spacing.md};
-  
-  span {
-    color: ${({ theme }) => theme.colors.accent.gold};
-  }
-`
-
-const SectionSubtitle = styled(motion.p)`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  max-width: 600px;
-  margin: 0 auto;
-`
-
 const FeaturesGrid = styled.div`
   display: flex;
   justify-content: center;
@@ -386,13 +357,6 @@ const FeatureButton = styled.button`
     color: #fff;
     box-shadow: 0 4px 15px rgba(201, 168, 108, 0.4);
   }
-`
-
-const FeatureDescription = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  line-height: ${({ theme }) => theme.lineHeights.relaxed};
-  display: none;
 `
 
 // Products Section - Auto Slider

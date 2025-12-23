@@ -1,10 +1,11 @@
 import styled, { css } from 'styled-components'
-import { motion, HTMLMotionProps } from 'framer-motion'
+import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'gold'
 type ButtonSize = 'sm' | 'md' | 'lg'
 
-interface ButtonProps extends HTMLMotionProps<'button'> {
+interface BaseButtonProps {
   variant?: ButtonVariant
   size?: ButtonSize
   fullWidth?: boolean
@@ -75,7 +76,7 @@ const sizes = {
   `,
 }
 
-const StyledButton = styled(motion.button)<ButtonProps>`
+const baseStyles = css<BaseButtonProps>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -89,6 +90,7 @@ const StyledButton = styled(motion.button)<ButtonProps>`
   text-transform: uppercase;
   letter-spacing: 0.05em;
   white-space: nowrap;
+  text-decoration: none;
   
   ${({ variant = 'primary' }) => variants[variant]}
   ${({ size = 'md' }) => sizes[size]}
@@ -123,6 +125,18 @@ const StyledButton = styled(motion.button)<ButtonProps>`
   `}
 `
 
+const StyledButton = styled(motion.button)<BaseButtonProps>`
+  ${baseStyles}
+`
+
+export const StyledLinkButton = styled(Link)<BaseButtonProps>`
+  ${baseStyles}
+`
+
+interface ButtonProps extends BaseButtonProps, React.ButtonHTMLAttributes<HTMLButtonElement> {
+  children: React.ReactNode
+}
+
 export const Button: React.FC<ButtonProps> = ({ 
   children, 
   variant = 'primary',
@@ -141,3 +155,29 @@ export const Button: React.FC<ButtonProps> = ({
   )
 }
 
+interface LinkButtonProps extends BaseButtonProps {
+  children: React.ReactNode
+  to: string
+  style?: React.CSSProperties
+}
+
+export const LinkButton: React.FC<LinkButtonProps> = ({ 
+  children, 
+  variant = 'primary',
+  size = 'md',
+  to,
+  style,
+  ...props 
+}) => {
+  return (
+    <StyledLinkButton
+      variant={variant}
+      size={size}
+      to={to}
+      style={style}
+      {...props}
+    >
+      {children}
+    </StyledLinkButton>
+  )
+}

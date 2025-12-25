@@ -367,54 +367,6 @@ const MapPanel = styled.div`
   }
 `
 
-// ============ DELIVERY ============
-const DeliverySection = styled.section`
-  background: ${({ theme }) => theme.colors.dark.main};
-  padding: ${({ theme }) => `${theme.spacing['4xl']} ${theme.spacing['3xl']}`};
-  
-  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
-    padding: ${({ theme }) => `${theme.spacing['3xl']} ${theme.spacing.xl}`};
-  }
-`
-
-const DeliveryContainer = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-  text-align: center;
-`
-
-const DeliveryTitle = styled.h2`
-  font-size: ${({ theme }) => theme.fontSizes['3xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.light};
-  color: ${({ theme }) => theme.colors.text.white};
-  margin-bottom: ${({ theme }) => theme.spacing['2xl']};
-  
-  span { font-style: italic; color: ${({ theme }) => theme.colors.primary.accent}; }
-`
-
-const DeliveryGrid = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: ${({ theme }) => theme.spacing.xl};
-  flex-wrap: wrap;
-`
-
-const DeliveryItem = styled(motion.a)`
-  padding: ${({ theme }) => `${theme.spacing.lg} ${theme.spacing['2xl']}`};
-  border: 1px solid ${({ theme }) => theme.colors.dividerLight};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  color: ${({ theme }) => theme.colors.text.cream};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  transition: all ${({ theme }) => theme.transitions.fast};
-  
-  &:hover {
-    background: ${({ theme }) => theme.colors.primary.main};
-    border-color: ${({ theme }) => theme.colors.primary.main};
-    color: ${({ theme }) => theme.colors.dark.main};
-    transform: scale(1.05);
-  }
-`
 
 // ============ COMPONENT ============
 interface Location {
@@ -536,26 +488,6 @@ const Locations: React.FC = () => {
         </MapPanel>
       </MainSection>
       
-      <DeliverySection>
-        <DeliveryContainer>
-          <DeliveryTitle>Заказать <span>доставку</span></DeliveryTitle>
-          <DeliveryGrid>
-            {['Wolt', 'Yandex Eats', 'Express24'].map((service, i) => (
-              <DeliveryItem
-                key={service}
-                href="#"
-                target="_blank"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-              >
-                {service}
-              </DeliveryItem>
-            ))}
-          </DeliveryGrid>
-        </DeliveryContainer>
-      </DeliverySection>
     </>
   )
 }

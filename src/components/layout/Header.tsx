@@ -98,6 +98,23 @@ const ReserveButton = styled(Link)`
   }
 `
 
+const MobileReserveHeaderButton = styled(Link)`
+  display: none;
+  padding: ${({ theme }) => `6px ${theme.spacing.md}`};
+  font-size: 10px;
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: ${({ theme }) => theme.colors.dark.main};
+  background: ${({ theme }) => theme.colors.primary.accent};
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  white-space: nowrap;
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    display: block;
+  }
+`
+
 const MobileMenuButton = styled.button`
   display: none;
   background: none;
@@ -155,6 +172,7 @@ const MobileCloseButton = styled.button`
   font-weight: ${({ theme }) => theme.fontWeights.light};
 `
 
+
 export const Header: React.FC = () => {
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -198,6 +216,7 @@ export const Header: React.FC = () => {
           </Nav>
           
           <ReserveButton to="/reservation">Забронировать</ReserveButton>
+          <MobileReserveHeaderButton to="/reservation">Забронировать</MobileReserveHeaderButton>
           
           <MobileMenuButton onClick={() => setMobileMenuOpen(true)}>
             <MenuLine />

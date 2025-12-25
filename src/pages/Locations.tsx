@@ -163,24 +163,30 @@ const LocationsList = styled.div`
   padding: ${({ theme }) => theme.spacing['3xl']};
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.xl};
+  gap: ${({ theme }) => theme.spacing.md};
   
   @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
-    padding: ${({ theme }) => theme.spacing['2xl']};
+    padding: ${({ theme }) => theme.spacing.lg};
+    gap: ${({ theme }) => theme.spacing.sm};
   }
 `
 
 const LocationCard = styled(motion.div)<{ $active: boolean }>`
-  padding: ${({ theme }) => theme.spacing.lg};
+  padding: ${({ theme }) => theme.spacing.md};
   background: ${({ $active, theme }) => $active ? theme.colors.dark.main : theme.colors.background.primary};
   color: ${({ $active, theme }) => $active ? theme.colors.text.white : theme.colors.text.primary};
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.spacing.lg};
+  gap: ${({ theme }) => theme.spacing.md};
   border: 1px solid ${({ $active, theme }) => $active ? theme.colors.primary.accent : 'transparent'};
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    padding: ${({ theme }) => theme.spacing.sm};
+    gap: ${({ theme }) => theme.spacing.sm};
+  }
   
   &:hover {
     background: ${({ $active, theme }) => $active ? theme.colors.dark.main : theme.colors.background.secondary};
@@ -189,8 +195,8 @@ const LocationCard = styled(motion.div)<{ $active: boolean }>`
 `
 
 const LocationIcon = styled.a<{ $active: boolean }>`
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: ${({ theme }) => theme.borderRadius.md};
   background: ${({ $active, theme }) => $active ? theme.colors.primary.accent : theme.colors.background.cream};
   display: flex;
@@ -202,12 +208,21 @@ const LocationIcon = styled.a<{ $active: boolean }>`
   position: relative;
   text-decoration: none;
   
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    width: 36px;
+    height: 36px;
+  }
+  
   span {
     font-family: ${({ theme }) => theme.fonts.heading};
-    font-size: 18px;
+    font-size: 16px;
     font-style: italic;
     color: ${({ $active, theme }) => $active ? theme.colors.dark.main : theme.colors.primary.accent};
     transition: all 0.3s ease;
+    
+    @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+      font-size: 14px;
+    }
   }
   
   &:hover {
@@ -260,9 +275,15 @@ const LocationAddress = styled.p<{ $active: boolean }>`
 const LocationMeta = styled.div<{ $active: boolean }>`
   display: flex;
   gap: ${({ theme }) => theme.spacing.md};
-  margin-top: 6px;
+  margin-top: 4px;
   font-size: 11px;
   color: ${({ $active, theme }) => $active ? theme.colors.text.cream : theme.colors.text.muted};
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    flex-direction: column;
+    gap: 2px;
+    font-size: 10px;
+  }
   
   span {
     display: flex;
@@ -272,26 +293,38 @@ const LocationMeta = styled.div<{ $active: boolean }>`
 `
 
 const LocationArrow = styled.div<{ $active: boolean }>`
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: ${({ $active, theme }) => $active ? theme.colors.primary.accent : theme.colors.text.muted};
-  font-size: 18px;
+  font-size: 16px;
   flex-shrink: 0;
   transition: all 0.3s ease;
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    display: none;
+  }
 `
 
 const MapPanel = styled.div`
   position: relative;
   z-index: 1; /* Keep below navigation */
   
+  @media (max-width: ${({ theme }) => theme.breakpoints.desktop}) {
+    min-height: 350px;
+  }
+  
   .leaflet-container {
     height: 100%;
     width: 100%;
     min-height: 500px;
     z-index: 1 !important; /* Override Leaflet's default z-index */
+    
+    @media (max-width: ${({ theme }) => theme.breakpoints.desktop}) {
+      min-height: 350px;
+    }
   }
   
   /* Custom marker animation */

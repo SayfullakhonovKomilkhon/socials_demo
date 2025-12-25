@@ -86,7 +86,7 @@ const MenuSection = styled.section`
   }
 `
 
-/* ===== BACKGROUND EFFECTS (z-index: 0) ===== */
+/* ===== BACKGROUND EFFECTS (z-index: 0) - Hidden on mobile for performance ===== */
 
 /* Animated border frame - BACKGROUND */
 const AnimatedFrame = styled(motion.div)`
@@ -99,6 +99,10 @@ const AnimatedFrame = styled(motion.div)`
   border-radius: 30px;
   pointer-events: none;
   z-index: 0;
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
   
   &::before {
     content: '';
@@ -141,6 +145,10 @@ const Sparkle = styled(motion.div)`
     0 0 30px #C9A87C,
     0 0 45px rgba(201, 168, 124, 0.8),
     0 0 60px rgba(201, 168, 124, 0.6);
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
 `
 
 /* Floating icons - BACKGROUND */
@@ -150,6 +158,10 @@ const FloatingIcon = styled(motion.div)`
   pointer-events: none;
   z-index: 0;
   opacity: 0.15;
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
 `
 
 /* Corner decorative brackets - BACKGROUND */
@@ -159,6 +171,10 @@ const CornerBracket = styled(motion.div)<{ $corner: string }>`
   height: 120px;
   pointer-events: none;
   z-index: 0;
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
   
   &::before, &::after {
     content: '';
@@ -216,6 +232,10 @@ const MarqueeBanner = styled(motion.div)`
   pointer-events: none;
   z-index: 0;
   transform: rotate(-5deg);
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
 `
 
 const MarqueeText = styled(motion.div)`
@@ -241,6 +261,10 @@ const CrossingLine = styled(motion.div)`
   pointer-events: none;
   z-index: 0;
   box-shadow: 0 0 30px rgba(201, 168, 124, 0.3);
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
 `
 
 /* Pulsing dot indicators - BACKGROUND */
@@ -252,6 +276,10 @@ const PulsingDot = styled(motion.div)`
   border-radius: 50%;
   pointer-events: none;
   z-index: 0;
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
   
   &::before {
     content: '';
@@ -286,6 +314,10 @@ const FloatingCircle = styled(motion.div)<{ $size: number }>`
   border-radius: 50%;
   pointer-events: none;
   z-index: 0;
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
 `
 
 /* Gradient blobs - BACKGROUND */
@@ -298,6 +330,10 @@ const GradientBlob = styled(motion.div)<{ $size: number }>`
   pointer-events: none;
   z-index: 0;
   filter: blur(40px);
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
 `
 
 const MenuContainer = styled.div`
@@ -377,6 +413,10 @@ const CardImageWrapper = styled(motion.div)`
   aspect-ratio: 4/5;
   border-radius: 24px;
   overflow: hidden;
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    border-radius: 16px;
+  }
   
   &::before {
     content: '';

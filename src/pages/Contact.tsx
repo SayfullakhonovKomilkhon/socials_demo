@@ -69,6 +69,10 @@ const InfoSection = styled.div`
   position: relative;
   overflow: hidden;
   
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    padding: ${({ theme }) => `${theme.spacing['2xl']} ${theme.spacing.lg}`};
+  }
+  
   /* Decorative circle */
   &::before {
     content: '';
@@ -80,6 +84,10 @@ const InfoSection = styled.div`
     border: 1px solid ${({ theme }) => theme.colors.primary.accent};
     border-radius: 50%;
     opacity: 0.1;
+    
+    @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+      display: none;
+    }
   }
   
   @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {

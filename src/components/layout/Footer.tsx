@@ -168,28 +168,38 @@ export const Footer: React.FC = () => {
           <FooterBrand>
             <FooterLogo to="/">Socials <span>Cafe</span></FooterLogo>
             <FooterDescription>
-              Where moments become memories. Part of the Memories Group, 
-              celebrating food, people, and connection since 2019.
+              Где моменты становятся воспоминаниями. Часть Memories Group, 
+              объединяющая еду, людей и связи с 2019 года.
             </FooterDescription>
             <SocialLinks>
-              <SocialLink href="https://instagram.com/socials_uz" target="_blank" rel="noopener noreferrer">📷</SocialLink>
-              <SocialLink href="https://t.me/socialscafe" target="_blank" rel="noopener noreferrer">✈️</SocialLink>
+              <SocialLink href="https://instagram.com/socials_uz" target="_blank" rel="noopener noreferrer" title="Instagram">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="1.5" fill="none">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                  <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                </svg>
+              </SocialLink>
+              <SocialLink href="https://t.me/socialscafe" target="_blank" rel="noopener noreferrer" title="Telegram">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="1.5" fill="none">
+                  <path d="M21.2 4.4L2.4 10.8c-.6.2-.6 1.1.1 1.3l4.9 1.5 1.9 6c.1.4.6.5.9.3l2.8-2.3 5.5 4c.4.3 1 .1 1.1-.4L22.8 5.5c.2-.7-.5-1.3-1.1-1.1zM9.6 13.4l-.3 3.3-.9-4.2 10.6-6.5-9.4 7.4z"/>
+                </svg>
+              </SocialLink>
             </SocialLinks>
           </FooterBrand>
           
           <FooterColumn>
-            <FooterColumnTitle>Navigate</FooterColumnTitle>
+            <FooterColumnTitle>Навигация</FooterColumnTitle>
             <FooterLinks>
-              <li><FooterLink to="/">Home</FooterLink></li>
-              <li><FooterLink to="/menu">Menu</FooterLink></li>
-              <li><FooterLink to="/locations">Locations</FooterLink></li>
-              <li><FooterLink to="/contact">Contact</FooterLink></li>
-              <li><FooterLink to="/reservation">Reservation</FooterLink></li>
+              <li><FooterLink to="/">Главная</FooterLink></li>
+              <li><FooterLink to="/menu">Меню</FooterLink></li>
+              <li><FooterLink to="/locations">Локации</FooterLink></li>
+              <li><FooterLink to="/contact">Контакты</FooterLink></li>
+              <li><FooterLink to="/reservation">Бронирование</FooterLink></li>
             </FooterLinks>
           </FooterColumn>
           
           <FooterColumn>
-            <FooterColumnTitle>Delivery</FooterColumnTitle>
+            <FooterColumnTitle>Доставка</FooterColumnTitle>
             <FooterLinks>
               <li><FooterExternalLink href="https://wolt.com" target="_blank" rel="noopener noreferrer">Wolt</FooterExternalLink></li>
               <li><FooterExternalLink href="https://yandex.uz/eda" target="_blank" rel="noopener noreferrer">Yandex Eats</FooterExternalLink></li>
@@ -198,13 +208,13 @@ export const Footer: React.FC = () => {
           </FooterColumn>
           
           <FooterColumn>
-            <FooterColumnTitle>Contact</FooterColumnTitle>
+            <FooterColumnTitle>Контакты</FooterColumnTitle>
             <FooterInfo>
               <p>+998 99 901 44 33</p>
               <p>info@socialscafe.uz</p>
               <br />
-              <p>36 A Taras Shevchenko street</p>
-              <p>Tashkent, Uzbekistan</p>
+              <p>ул. Тараса Шевченко 36А</p>
+              <p>Ташкент, Узбекистан</p>
             </FooterInfo>
           </FooterColumn>
         </FooterContainer>
@@ -212,9 +222,9 @@ export const Footer: React.FC = () => {
       
       <FooterBottom>
         <FooterBottomContent>
-          <Copyright>© {new Date().getFullYear()} Socials Cafe. All rights reserved.</Copyright>
+          <Copyright>© {new Date().getFullYear()} Socials Cafe. Все права защищены.</Copyright>
           <MemoriesGroup href="https://memoriesgroup.uz" target="_blank" rel="noopener noreferrer">
-            Part of Memories Group
+            Часть Memories Group
           </MemoriesGroup>
         </FooterBottomContent>
       </FooterBottom>

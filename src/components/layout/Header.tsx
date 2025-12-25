@@ -172,10 +172,10 @@ export const Header: React.FC = () => {
   }, [mobileMenuOpen])
   
   const navLinks = [
-    { path: '/', label: 'Home' },
-    { path: '/menu', label: 'Menu' },
-    { path: '/locations', label: 'Locations' },
-    { path: '/contact', label: 'Contact' },
+    { path: '/', label: 'Главная' },
+    { path: '/menu', label: 'Меню' },
+    { path: '/locations', label: 'Локации' },
+    { path: '/contact', label: 'Контакты' },
   ]
   
   return (
@@ -197,7 +197,7 @@ export const Header: React.FC = () => {
             ))}
           </Nav>
           
-          <ReserveButton to="/reservation">Reserve</ReserveButton>
+          <ReserveButton to="/reservation">Забронировать</ReserveButton>
           
           <MobileMenuButton onClick={() => setMobileMenuOpen(true)}>
             <MenuLine />
@@ -223,7 +223,7 @@ export const Header: React.FC = () => {
                 transition={{ delay: i * 0.1, duration: 0.5 }}
               >
                 <MobileNavLink to={link.path} onClick={() => setMobileMenuOpen(false)}>
-                  {link.label === 'Home' ? <span>Home</span> : link.label}
+                  {link.label === 'Главная' ? <span>Главная</span> : link.label}
                 </MobileNavLink>
               </motion.div>
             ))}

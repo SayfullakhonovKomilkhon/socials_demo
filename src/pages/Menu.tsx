@@ -747,7 +747,7 @@ interface MenuItem {
 }
 
 const Menu: React.FC = () => {
-  const [activeCategory, setActiveCategory] = useState('All')
+  const [activeCategory, setActiveCategory] = useState('Все')
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null)
   const [hoveredCard, setHoveredCard] = useState<number | null>(null)
   
@@ -760,21 +760,21 @@ const Menu: React.FC = () => {
   const heroY = useTransform(scrollYProgress, [0, 1], [0, 150])
   const heroScale = useTransform(scrollYProgress, [0, 1], [1, 1.1])
   
-  const categories = ['All', 'Coffee', 'Breakfast', 'Desserts', 'Drinks']
+  const categories = ['Все', 'Кофе', 'Завтраки', 'Десерты', 'Напитки']
   
   const menuItems: MenuItem[] = [
-    { id: 1, name: 'Signature Latte', description: 'Our signature espresso with silky steamed milk and delicate latte art. A perfect balance of bold and smooth.', price: '45,000', category: 'Coffee', image: 'https://images.unsplash.com/photo-1534778101976-62847782c213?w=800&q=80', popular: true },
-    { id: 2, name: 'Flat White', description: 'Double ristretto with velvety microfoam milk. Bold yet smooth for the true coffee lover.', price: '42,000', category: 'Coffee', image: 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?w=800&q=80' },
-    { id: 3, name: 'Iced Americano', description: 'Refreshing double espresso over ice with cold water. Perfect for warm days.', price: '38,000', category: 'Coffee', image: 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=800&q=80' },
-    { id: 4, name: 'Avocado Toast', description: 'Smashed avocado on sourdough with poached eggs, cherry tomatoes, and microgreens.', price: '68,000', category: 'Breakfast', image: 'https://images.unsplash.com/photo-1603046891726-36bfd957e0bf?w=800&q=80', popular: true },
-    { id: 5, name: 'Eggs Benedict', description: 'Poached eggs on English muffin with hollandaise sauce and smoked salmon.', price: '75,000', category: 'Breakfast', image: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=800&q=80' },
-    { id: 6, name: 'Berry Pancakes', description: 'Fluffy buttermilk pancakes with fresh berries, maple syrup, and whipped cream.', price: '58,000', category: 'Breakfast', image: 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=800&q=80', popular: true },
-    { id: 7, name: 'Pistachio Croissant', description: 'Buttery French croissant filled with pistachio cream and topped with crushed pistachios.', price: '35,000', category: 'Desserts', image: 'https://images.unsplash.com/photo-1623334044303-241021148842?w=800&q=80', popular: true },
-    { id: 8, name: 'Tiramisu', description: 'Classic Italian layers of espresso-soaked ladyfingers and mascarpone cream.', price: '48,000', category: 'Desserts', image: 'https://images.unsplash.com/photo-1586040140378-b5634cb4c8fc?w=800&q=80' },
-    { id: 9, name: 'Fresh Lemonade', description: 'House-made lemonade with fresh mint leaves and a hint of ginger.', price: '28,000', category: 'Drinks', image: 'https://images.unsplash.com/photo-1523677011781-c91d1bbe2f9e?w=800&q=80' },
+    { id: 1, name: 'Фирменный Латте', description: 'Наш фирменный эспрессо с нежным молоком и изысканным латте-артом. Идеальный баланс насыщенности и мягкости.', price: '45,000', category: 'Кофе', image: 'https://images.unsplash.com/photo-1534778101976-62847782c213?w=800&q=80', popular: true },
+    { id: 2, name: 'Флэт Уайт', description: 'Двойной ристретто с бархатистой молочной пенкой. Насыщенный и мягкий для истинных ценителей.', price: '42,000', category: 'Кофе', image: 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?w=800&q=80' },
+    { id: 3, name: 'Айс Американо', description: 'Освежающий двойной эспрессо со льдом и холодной водой. Идеален для жарких дней.', price: '38,000', category: 'Кофе', image: 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=800&q=80' },
+    { id: 4, name: 'Тост с авокадо', description: 'Авокадо на хрустящем хлебе с яйцами пашот, черри и микрозеленью.', price: '68,000', category: 'Завтраки', image: 'https://images.unsplash.com/photo-1603046891726-36bfd957e0bf?w=800&q=80', popular: true },
+    { id: 5, name: 'Яйца Бенедикт', description: 'Яйца пашот на английском маффине с голландским соусом и копчёным лососем.', price: '75,000', category: 'Завтраки', image: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=800&q=80' },
+    { id: 6, name: 'Панкейки с ягодами', description: 'Пышные панкейки со свежими ягодами, кленовым сиропом и взбитыми сливками.', price: '58,000', category: 'Завтраки', image: 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=800&q=80', popular: true },
+    { id: 7, name: 'Фисташковый круассан', description: 'Нежный французский круассан с фисташковым кремом и дроблёными фисташками.', price: '35,000', category: 'Десерты', image: 'https://images.unsplash.com/photo-1623334044303-241021148842?w=800&q=80', popular: true },
+    { id: 8, name: 'Тирамису', description: 'Классические итальянские слои савоярди, пропитанных эспрессо, и крема из маскарпоне.', price: '48,000', category: 'Десерты', image: 'https://images.unsplash.com/photo-1586040140378-b5634cb4c8fc?w=800&q=80' },
+    { id: 9, name: 'Свежий лимонад', description: 'Домашний лимонад со свежей мятой и ноткой имбиря.', price: '28,000', category: 'Напитки', image: 'https://images.unsplash.com/photo-1523677011781-c91d1bbe2f9e?w=800&q=80' },
   ]
   
-  const filteredItems = activeCategory === 'All' 
+  const filteredItems = activeCategory === 'Все' 
     ? menuItems 
     : menuItems.filter(item => item.category === activeCategory)
   
@@ -791,7 +791,7 @@ const Menu: React.FC = () => {
               animate={{ y: 0 }}
               transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
             >
-              Our <span className="italic">Menu</span>
+              Наше <span className="italic">Меню</span>
             </HeroTitleLine>
           </HeroTitle>
           <HeroDescription
@@ -799,8 +799,8 @@ const Menu: React.FC = () => {
             animate={{ opacity: 0.7, y: 0 }}
             transition={{ duration: 1, delay: 0.3 }}
           >
-            Every dish tells a story. Discover our curated selection 
-            crafted with passion and the finest ingredients.
+            Каждое блюдо рассказывает историю. Откройте для себя нашу 
+            коллекцию, созданную с любовью и лучшими ингредиентами.
           </HeroDescription>
         </HeroContent>
       </HeroSection>
@@ -991,16 +991,16 @@ const Menu: React.FC = () => {
             animate={{ x: [0, -2000] }}
             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           >
-            <span>✦ SIGNATURE MENU</span>
-            <span>✦ ARTISAN COFFEE</span>
-            <span>✦ FRESH BAKERY</span>
-            <span>✦ SPECIALTY DRINKS</span>
-            <span>✦ HANDCRAFTED DESSERTS</span>
-            <span>✦ SIGNATURE MENU</span>
-            <span>✦ ARTISAN COFFEE</span>
-            <span>✦ FRESH BAKERY</span>
-            <span>✦ SPECIALTY DRINKS</span>
-            <span>✦ HANDCRAFTED DESSERTS</span>
+            <span>✦ ФИРМЕННОЕ МЕНЮ</span>
+            <span>✦ АВТОРСКИЙ КОФЕ</span>
+            <span>✦ СВЕЖАЯ ВЫПЕЧКА</span>
+            <span>✦ ОСОБЫЕ НАПИТКИ</span>
+            <span>✦ АВТОРСКИЕ ДЕСЕРТЫ</span>
+            <span>✦ ФИРМЕННОЕ МЕНЮ</span>
+            <span>✦ АВТОРСКИЙ КОФЕ</span>
+            <span>✦ СВЕЖАЯ ВЫПЕЧКА</span>
+            <span>✦ ОСОБЫЕ НАПИТКИ</span>
+            <span>✦ АВТОРСКИЕ ДЕСЕРТЫ</span>
           </MarqueeText>
         </MarqueeBanner>
         
@@ -1084,7 +1084,7 @@ const Menu: React.FC = () => {
                           }}
                           transition={{ duration: 0.3 }}
                         >
-                          ✦ Popular
+                          ✦ Хит
                         </CardBadge>
                       )}
                       
@@ -1144,7 +1144,7 @@ const Menu: React.FC = () => {
                               whileHover={{ scale: 1.02 }}
                               whileTap={{ scale: 0.98 }}
                             >
-                              Quick View
+                              Подробнее
                             </ActionButton>
                           </MagneticButton>
                           <MagneticButton strength={0.15}>
@@ -1153,7 +1153,7 @@ const Menu: React.FC = () => {
                               whileHover={{ scale: 1.02 }}
                               whileTap={{ scale: 0.98 }}
                             >
-                              Order Now
+                              Заказать
                             </ActionButton>
                           </MagneticButton>
                         </CardActions>
@@ -1235,7 +1235,7 @@ const Menu: React.FC = () => {
                       {selectedItem.price}<span>сум</span>
                     </ModalPrice>
                     <MagneticButton>
-                      <ModalButton>Add to Order</ModalButton>
+                      <ModalButton>Добавить в заказ</ModalButton>
                     </MagneticButton>
                   </ModalPriceRow>
                 </motion.div>

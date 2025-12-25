@@ -425,8 +425,8 @@ const Reservation: React.FC = () => {
   const [completed, setCompleted] = useState(false)
   
   const locations = [
-    { id: 'shevchenko', name: 'Socials Shevchenko', address: '36 A Taras Shevchenko street' },
-    { id: 'mirzo', name: 'Socials Mirzo Ulugbek', address: '15 Mirzo Ulugbek street' },
+    { id: 'shevchenko', name: 'Socials Шевченко', address: 'ул. Тараса Шевченко 36А' },
+    { id: 'mirzo', name: 'Socials Мирзо Улугбек', address: 'ул. Мирзо Улугбека 15' },
   ]
   
   const times = ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00']
@@ -470,7 +470,7 @@ const Reservation: React.FC = () => {
         <HeroSection ref={heroRef}>
           <HeroMedia style={{ y: heroY, scale: heroScale }}><img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1920&q=80" alt="" /></HeroMedia>
           <HeroContent initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }}>
-            <HeroTitle>Reservation <span>Confirmed</span></HeroTitle>
+            <HeroTitle>Бронь <span>подтверждена</span></HeroTitle>
           </HeroContent>
         </HeroSection>
         <MainSection>
@@ -478,8 +478,8 @@ const Reservation: React.FC = () => {
             <FormCard initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
               <Success>
                 <SuccessIcon>✓</SuccessIcon>
-                <SuccessTitle>See You Soon!</SuccessTitle>
-                <SuccessText>Your reservation has been confirmed. We look forward to hosting you.</SuccessText>
+                <SuccessTitle>До скорой встречи!</SuccessTitle>
+                <SuccessText>Ваша бронь подтверждена. Будем рады вас видеть.</SuccessText>
               </Success>
             </FormCard>
           </MainContainer>
@@ -493,15 +493,15 @@ const Reservation: React.FC = () => {
       <HeroSection ref={heroRef}>
         <HeroMedia style={{ y: heroY, scale: heroScale }}><img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1920&q=80" alt="" /></HeroMedia>
         <HeroContent initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }}>
-          <HeroTitle>Reserve a <span>Table</span></HeroTitle>
-          <HeroDescription>Book your spot for an unforgettable experience</HeroDescription>
+          <HeroTitle>Забронировать <span>столик</span></HeroTitle>
+          <HeroDescription>Зарезервируйте место для незабываемого опыта</HeroDescription>
         </HeroContent>
       </HeroSection>
       
       <MainSection>
         <MainContainer>
           <Steps>
-            {['Location', 'Date', 'Guests', 'Details'].map((label, i) => (
+            {['Локация', 'Дата', 'Гости', 'Детали'].map((label, i) => (
               <Step key={label} $active={step === i + 1} $done={step > i + 1}>
                 <StepNumber $active={step === i + 1} $done={step > i + 1}>
                   {step > i + 1 ? '✓' : i + 1}
@@ -515,7 +515,7 @@ const Reservation: React.FC = () => {
             <FormCard key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
               {step === 1 && (
                 <>
-                  <FormTitle>Choose Location</FormTitle>
+                  <FormTitle>Выберите локацию</FormTitle>
                   <LocationGrid>
                     {locations.map(loc => (
                       <LocationOption key={loc.id} $selected={location === loc.id} onClick={() => setLocation(loc.id)}>
@@ -529,17 +529,17 @@ const Reservation: React.FC = () => {
               
               {step === 2 && (
                 <>
-                  <FormTitle>Select Date & Time</FormTitle>
+                  <FormTitle>Выберите дату и время</FormTitle>
                   <DateTimeGrid>
                     <div>
-                      <SectionLabel>Date</SectionLabel>
+                      <SectionLabel>Дата</SectionLabel>
                       <Calendar>
-                        {['S','M','T','W','T','F','S'].map((d,i) => <CalendarDay key={`h-${i}`} $selected={false} $disabled={false} $header>{d}</CalendarDay>)}
+                        {['Вс','Пн','Вт','Ср','Чт','Пт','Сб'].map((d,i) => <CalendarDay key={`h-${i}`} $selected={false} $disabled={false} $header>{d}</CalendarDay>)}
                         {days}
                       </Calendar>
                     </div>
                     <div>
-                      <SectionLabel>Time</SectionLabel>
+                      <SectionLabel>Время</SectionLabel>
                       <TimeSlots>
                         {times.map(t => <TimeSlot key={t} $selected={selectedTime === t} onClick={() => setSelectedTime(t)}>{t}</TimeSlot>)}
                       </TimeSlots>
@@ -550,7 +550,7 @@ const Reservation: React.FC = () => {
 
               {step === 3 && (
                 <>
-                  <FormTitle>Number of Guests</FormTitle>
+                  <FormTitle>Количество гостей</FormTitle>
                   <GuestSelector>
                     <GuestButton onClick={() => setGuests(Math.max(1, guests - 1))} disabled={guests <= 1}>−</GuestButton>
                     <GuestCount>{guests}</GuestCount>
@@ -561,20 +561,20 @@ const Reservation: React.FC = () => {
 
               {step === 4 && (
                 <>
-                  <FormTitle>Your Details</FormTitle>
+                  <FormTitle>Ваши данные</FormTitle>
                   <FormGrid>
-                    <FormGroup><FormLabel>Name *</FormLabel><FormInput placeholder="Your name" value={contactInfo.name} onChange={e => setContactInfo(p => ({ ...p, name: e.target.value }))} /></FormGroup>
-                    <FormGroup><FormLabel>Phone *</FormLabel><FormInput placeholder="+998" value={contactInfo.phone} onChange={e => setContactInfo(p => ({ ...p, phone: e.target.value }))} /></FormGroup>
-                    <FormGroup $full><FormLabel>Email</FormLabel><FormInput placeholder="your@email.com" value={contactInfo.email} onChange={e => setContactInfo(p => ({ ...p, email: e.target.value }))} /></FormGroup>
-                    <FormGroup $full><FormLabel>Notes</FormLabel><FormTextarea placeholder="Any special requests..." value={contactInfo.notes} onChange={e => setContactInfo(p => ({ ...p, notes: e.target.value }))} /></FormGroup>
+                    <FormGroup><FormLabel>Имя *</FormLabel><FormInput placeholder="Ваше имя" value={contactInfo.name} onChange={e => setContactInfo(p => ({ ...p, name: e.target.value }))} /></FormGroup>
+                    <FormGroup><FormLabel>Телефон *</FormLabel><FormInput placeholder="+998" value={contactInfo.phone} onChange={e => setContactInfo(p => ({ ...p, phone: e.target.value }))} /></FormGroup>
+                    <FormGroup $full><FormLabel>Email</FormLabel><FormInput placeholder="ваш@email.com" value={contactInfo.email} onChange={e => setContactInfo(p => ({ ...p, email: e.target.value }))} /></FormGroup>
+                    <FormGroup $full><FormLabel>Примечания</FormLabel><FormTextarea placeholder="Особые пожелания..." value={contactInfo.notes} onChange={e => setContactInfo(p => ({ ...p, notes: e.target.value }))} /></FormGroup>
                   </FormGrid>
                     </>
                   )}
 
               <Navigation>
-                <NavButton onClick={handleBack} disabled={step === 1}>Back</NavButton>
+                <NavButton onClick={handleBack} disabled={step === 1}>Назад</NavButton>
                 <NavButton $primary onClick={handleNext} disabled={!canProceed()}>
-                  {step === 4 ? 'Confirm' : 'Continue'}
+                  {step === 4 ? 'Подтвердить' : 'Продолжить'}
                 </NavButton>
               </Navigation>
             </FormCard>

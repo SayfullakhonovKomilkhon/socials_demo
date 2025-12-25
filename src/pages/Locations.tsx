@@ -430,8 +430,8 @@ interface Location {
 
 const Locations: React.FC = () => {
   const locations: Location[] = [
-    { id: 1, name: 'Socials Shevchenko', address: '36 A Taras Shevchenko street, Tashkent', hours: '08:00 - 23:00', phone: '+998 99 901 44 33', lat: 41.311081, lng: 69.279737, flagship: true },
-    { id: 2, name: 'Socials Mirzo Ulugbek', address: '15 Mirzo Ulugbek street, Tashkent', hours: '08:00 - 22:00', phone: '+998 99 901 44 34', lat: 41.338540, lng: 69.334890 },
+    { id: 1, name: 'Socials Шевченко', address: 'ул. Тараса Шевченко 36А, Ташкент', hours: '08:00 - 23:00', phone: '+998 99 901 44 33', lat: 41.311081, lng: 69.279737, flagship: true },
+    { id: 2, name: 'Socials Мирзо Улугбек', address: 'ул. Мирзо Улугбека 15, Ташкент', hours: '08:00 - 22:00', phone: '+998 99 901 44 34', lat: 41.338540, lng: 69.334890 },
   ]
   
   const [activeLocation, setActiveLocation] = useState(locations[0])
@@ -456,7 +456,7 @@ const Locations: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
         >
-          <HeroTitle>Find <span>Us</span></HeroTitle>
+          <HeroTitle>Найдите <span>нас</span></HeroTitle>
         </HeroContent>
       </HeroSection>
       
@@ -538,7 +538,7 @@ const Locations: React.FC = () => {
       
       <DeliverySection>
         <DeliveryContainer>
-          <DeliveryTitle>Order <span>Delivery</span></DeliveryTitle>
+          <DeliveryTitle>Заказать <span>доставку</span></DeliveryTitle>
           <DeliveryGrid>
             {['Wolt', 'Yandex Eats', 'Express24'].map((service, i) => (
               <DeliveryItem

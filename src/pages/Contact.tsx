@@ -514,7 +514,7 @@ const Contact: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
         >
-          <HeroTitle>Get in <span>Touch</span></HeroTitle>
+          <HeroTitle>Связаться с <span>нами</span></HeroTitle>
         </HeroContent>
       </HeroSection>
       
@@ -526,22 +526,22 @@ const Contact: React.FC = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
             >
-              Contact
+              Контакты
             </SectionTag>
             <SectionTitle
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
             >
-              Let's Start a <span>Conversation</span>
+              Давайте начнём <span>разговор</span>
             </SectionTitle>
             <InfoText
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              Have a question or feedback? We'd love to hear from you. 
-              Drop by, give us a call, or send a message.
+              Есть вопрос или пожелание? Будем рады услышать вас. 
+              Заходите, звоните или пишите.
             </InfoText>
             
             <ContactItems>
@@ -559,8 +559,8 @@ const Contact: React.FC = () => {
                   </svg>
                 </ContactIcon>
                 <ContactInfo>
-                  <ContactLabel>Visit Us</ContactLabel>
-                  <ContactValue>36 A Taras Shevchenko, Tashkent</ContactValue>
+                  <ContactLabel>Адрес</ContactLabel>
+                  <ContactValue>ул. Тараса Шевченко 36А, Ташкент</ContactValue>
                 </ContactInfo>
                 <ContactArrow>→</ContactArrow>
               </ContactItem>
@@ -577,7 +577,7 @@ const Contact: React.FC = () => {
                   </svg>
                 </ContactIcon>
                 <ContactInfo>
-                  <ContactLabel>Call Us</ContactLabel>
+                  <ContactLabel>Телефон</ContactLabel>
                   <ContactValue>+998 99 901 44 33</ContactValue>
                 </ContactInfo>
                 <ContactArrow>→</ContactArrow>
@@ -596,14 +596,14 @@ const Contact: React.FC = () => {
                   </svg>
                 </ContactIcon>
                 <ContactInfo>
-                  <ContactLabel>Email Us</ContactLabel>
+                  <ContactLabel>Почта</ContactLabel>
                   <ContactValue>info@socialscafe.uz</ContactValue>
                 </ContactInfo>
                 <ContactArrow>→</ContactArrow>
               </ContactItem>
             </ContactItems>
             
-            <Divider><span>Follow Us</span></Divider>
+            <Divider><span>Мы в соцсетях</span></Divider>
             
             <SocialLinks>
               <SocialLink 
@@ -658,8 +658,8 @@ const Contact: React.FC = () => {
                   <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
                 </svg>
               </FormIcon>
-              <FormTitle>Send a <span>Message</span></FormTitle>
-              <FormSubtitle>We'll get back to you within 24 hours</FormSubtitle>
+              <FormTitle>Напишите <span>нам</span></FormTitle>
+              <FormSubtitle>Ответим в течение 24 часов</FormSubtitle>
             </FormHeader>
             
             {submitted && (
@@ -667,16 +667,16 @@ const Contact: React.FC = () => {
                 initial={{ opacity: 0, scale: 0.9 }} 
                 animate={{ opacity: 1, scale: 1 }}
               >
-                ✓ Message sent successfully!
+                ✓ Сообщение отправлено!
               </SuccessMessage>
             )}
             
             <FormGrid>
               <FormGroup>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>Имя</FormLabel>
                 <FormInput 
                   type="text"
-                  placeholder="Your name"
+                  placeholder="Ваше имя"
                   value={formData.name}
                   onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
                   required
@@ -686,16 +686,16 @@ const Contact: React.FC = () => {
                 <FormLabel>Email</FormLabel>
                 <FormInput 
                   type="email"
-                  placeholder="your@email.com"
+                  placeholder="ваш@email.com"
                   value={formData.email}
                   onChange={e => setFormData(p => ({ ...p, email: e.target.value }))}
                   required
                 />
               </FormGroup>
               <FormGroup>
-                <FormLabel>Message</FormLabel>
+                <FormLabel>Сообщение</FormLabel>
                 <FormTextarea 
-                  placeholder="What would you like to tell us?"
+                  placeholder="Что бы вы хотели нам сказать?"
                   value={formData.message}
                   onChange={e => setFormData(p => ({ ...p, message: e.target.value }))}
                   required
@@ -708,7 +708,7 @@ const Contact: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              Send Message →
+              Отправить →
             </SubmitButton>
           </FormInner>
         </FormSection>

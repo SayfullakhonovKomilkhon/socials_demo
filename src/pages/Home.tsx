@@ -421,14 +421,15 @@ const FeatureIcon = styled.span`
 
 const FeatureNumber = styled(motion.span)`
   position: absolute;
-  top: -20px;
-  right: -20px;
+  top: 16px;
+  right: 20px;
   font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: ${({ theme }) => theme.fontSizes['6xl']};
+  font-size: ${({ theme }) => theme.fontSizes['5xl']};
   font-weight: ${({ theme }) => theme.fontWeights.light};
   color: ${({ theme }) => theme.colors.primary.accent};
-  opacity: 0.15;
+  opacity: 0.2;
   font-style: italic;
+  line-height: 1;
 `
 
 const FeatureTitle = styled.h3`
@@ -621,16 +622,16 @@ const Home: React.FC = () => {
   const featuresBgScale = useTransform(featuresProgress, [0, 0.5, 1], [0.8, 1, 1.2])
   
   const menuItems = [
-    { name: 'Signature Latte', category: 'Coffee', price: '45,000 сум', image: 'https://images.unsplash.com/photo-1534778101976-62847782c213?w=800&q=80' },
-    { name: 'Avocado Toast', category: 'Breakfast', price: '68,000 сум', image: 'https://images.unsplash.com/photo-1603046891726-36bfd957e0bf?w=800&q=80' },
-    { name: 'Berry Pancakes', category: 'Breakfast', price: '58,000 сум', image: 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=800&q=80' },
-    { name: 'Croissant', category: 'Bakery', price: '35,000 сум', image: 'https://images.unsplash.com/photo-1623334044303-241021148842?w=800&q=80' },
+    { name: 'Фирменный Латте', category: 'Кофе', price: '45,000 сум', image: 'https://images.unsplash.com/photo-1534778101976-62847782c213?w=800&q=80' },
+    { name: 'Тост с авокадо', category: 'Завтраки', price: '68,000 сум', image: 'https://images.unsplash.com/photo-1603046891726-36bfd957e0bf?w=800&q=80' },
+    { name: 'Панкейки с ягодами', category: 'Завтраки', price: '58,000 сум', image: 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=800&q=80' },
+    { name: 'Круассан', category: 'Выпечка', price: '35,000 сум', image: 'https://images.unsplash.com/photo-1623334044303-241021148842?w=800&q=80' },
   ]
   
   const features = [
-    { icon: '☕', num: '01', title: 'Specialty Coffee', text: 'Carefully sourced beans, expertly roasted, crafted with precision.' },
-    { icon: '🍳', num: '02', title: 'Artisan Kitchen', text: 'From signature breakfasts to decadent desserts — culinary art.' },
-    { icon: '✨', num: '03', title: 'Warm Atmosphere', text: 'A space designed to inspire connection and creativity.' },
+    { icon: '☕', num: '01', title: 'Авторский кофе', text: 'Тщательно отобранные зёрна, мастерская обжарка, идеальное приготовление.' },
+    { icon: '🍳', num: '02', title: 'Авторская кухня', text: 'От фирменных завтраков до изысканных десертов — кулинарное искусство.' },
+    { icon: '✨', num: '03', title: 'Тёплая атмосфера', text: 'Пространство, вдохновляющее на общение и творчество.' },
   ]
   
   return (
@@ -649,8 +650,8 @@ const Home: React.FC = () => {
             transition={{ duration: 1, ease: "easeOut" }}
           >
             <HeroTitle>
-              Where Coffee<br />
-              <HeroTitleAccent>Meets Art</HeroTitleAccent>
+              Там, где кофе<br />
+              <HeroTitleAccent>встречает искусство</HeroTitleAccent>
             </HeroTitle>
           </motion.div>
           
@@ -659,8 +660,8 @@ const Home: React.FC = () => {
             animate={{ opacity: 0.9, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
           >
-            Welcome to Socials — a sanctuary for coffee lovers and food enthusiasts. 
-            Experience the perfect blend of exceptional flavors and warm hospitality.
+            Добро пожаловать в Socials — место для ценителей кофе и гастрономии. 
+            Испытайте идеальное сочетание исключительных вкусов и тёплого гостеприимства.
           </HeroDescription>
           
           <HeroButtons
@@ -668,8 +669,8 @@ const Home: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
           >
-            <HeroButton to="/menu">Explore Menu</HeroButton>
-            <HeroButtonOutline to="/reservation">Reserve Table</HeroButtonOutline>
+            <HeroButton to="/menu">Смотреть меню</HeroButton>
+            <HeroButtonOutline to="/reservation">Забронировать</HeroButtonOutline>
           </HeroButtons>
         </HeroContent>
         </motion.div>
@@ -679,7 +680,7 @@ const Home: React.FC = () => {
           animate={{ opacity: 0.5 }}
           transition={{ delay: 1 }}
         >
-          <ScrollText>Scroll</ScrollText>
+          <ScrollText>Листайте</ScrollText>
           <ScrollDot
             animate={{ y: [0, 10, 0] }}
             transition={{ duration: 1.5, repeat: Infinity }}
@@ -695,7 +696,7 @@ const Home: React.FC = () => {
         >
           {[...Array(4)].map((_, i) => (
             <MarqueeText key={i}>
-              Specialty Coffee <span className="accent">✦</span> Artisan Bakery <span className="accent">✦</span> Signature Breakfast <span className="accent">✦</span> 
+              Авторский кофе <span className="accent">✦</span> Ремесленная выпечка <span className="accent">✦</span> Фирменные завтраки <span className="accent">✦</span> 
             </MarqueeText>
           ))}
         </MarqueeTrack>
@@ -720,7 +721,7 @@ const Home: React.FC = () => {
               animate={aboutInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.6 }}
             >
-              Our Story
+              Наша история
             </SectionTag>
             
             <SectionTitle
@@ -728,7 +729,7 @@ const Home: React.FC = () => {
               animate={aboutInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.1 }}
             >
-              Crafted with <span>Passion</span>, Served with Love
+              Создано с <span>любовью</span>, подано с душой
             </SectionTitle>
             
             <SectionText
@@ -736,9 +737,9 @@ const Home: React.FC = () => {
               animate={aboutInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              Founded in 2019 by Davron Hamidov and Ziyovuddin Alikhonov, 
-              Socials Cafe has become one of Tashkent's most beloved destinations. 
-              Part of the Memories Group family.
+              Основано в 2019 году Давроном Хамидовым и Зиёвуддином Алихоновым. 
+              Socials Cafe стало одним из самых любимых мест в Ташкенте. 
+              Часть семьи Memories Group.
             </SectionText>
             
             <motion.div
@@ -746,7 +747,7 @@ const Home: React.FC = () => {
               animate={aboutInView ? { opacity: 1 } : {}}
               transition={{ duration: 0.8, delay: 0.3 }}
             >
-              <TextLink to="/contact">Discover Our Story →</TextLink>
+              <TextLink to="/contact">Узнать больше →</TextLink>
             </motion.div>
           </AboutInner>
         </AboutContent>
@@ -766,7 +767,7 @@ const Home: React.FC = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
             >
-              <SectionTag style={{ color: '#C9A87C' }}>Why Choose Us</SectionTag>
+              <SectionTag style={{ color: '#C9A87C' }}>Почему мы</SectionTag>
             </motion.div>
             <FeaturesTitle
               initial={{ opacity: 0, y: 30 }}
@@ -774,7 +775,7 @@ const Home: React.FC = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.1 }}
             >
-              Crafting <span>Moments</span> of Joy
+              Создаём <span>моменты</span> радости
             </FeaturesTitle>
             <FeaturesSubtitle
               initial={{ opacity: 0, y: 20 }}
@@ -782,7 +783,7 @@ const Home: React.FC = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              Every cup tells a story, every dish is a masterpiece
+              Каждая чашка рассказывает историю, каждое блюдо — шедевр
             </FeaturesSubtitle>
           </FeaturesHeader>
           
@@ -827,8 +828,8 @@ const Home: React.FC = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <SectionTag>The Menu</SectionTag>
-            <SectionTitle>Taste the <span>Difference</span></SectionTitle>
+            <SectionTag>Наше меню</SectionTag>
+            <SectionTitle>Почувствуйте <span>разницу</span></SectionTitle>
           </motion.div>
           <motion.div
             initial={{ opacity: 0 }}
@@ -836,7 +837,7 @@ const Home: React.FC = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <TextLink to="/menu">View Full Menu →</TextLink>
+            <TextLink to="/menu">Полное меню →</TextLink>
           </motion.div>
         </MenuHeader>
         
@@ -868,11 +869,11 @@ const Home: React.FC = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <SectionTag>Reserve</SectionTag>
+          <SectionTag>Бронирование</SectionTag>
           <CTATitle>
-            Ready for an <span>Unforgettable</span> Experience?
+            Готовы к <span>незабываемому</span> опыту?
           </CTATitle>
-          <CTAButton to="/reservation">Book Your Table</CTAButton>
+          <CTAButton to="/reservation">Забронировать столик</CTAButton>
         </CTAContent>
       </CTASection>
     </>

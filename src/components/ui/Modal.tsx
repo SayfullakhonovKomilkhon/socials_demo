@@ -1,15 +1,6 @@
-import { useEffect, useCallback } from 'react'
+import React, { useEffect } from 'react'
 import styled from 'styled-components'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X } from 'lucide-react'
-
-interface ModalProps {
-  isOpen: boolean
-  onClose: () => void
-  children: React.ReactNode
-  title?: string
-  size?: 'sm' | 'md' | 'lg' | 'xl'
-}
 
 const Overlay = styled(motion.div)`
   position: fixed;
@@ -17,97 +8,120 @@ const Overlay = styled(motion.div)`
   left: 0;
   right: 0;
   bottom: 0;
-  background: ${({ theme }) => theme.colors.overlay};
-  backdrop-filter: blur(4px);
+  background: ${({ theme }) => theme.colors.background.overlay};
+  z-index: ${({ theme }) => theme.zIndex.modal};
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: ${({ theme }) => theme.zIndex.overlay};
-  padding: ${({ theme }) => theme.spacing.lg};
+  padding: ${({ theme }) => theme.spacing.xl};
 `
 
-const sizes = {
-  sm: '400px',
-  md: '500px',
-  lg: '700px',
-  xl: '900px',
-}
-
-const ModalContainer = styled(motion.div)<{ $size: string }>`
+const ModalContainer = styled(motion.div)<{ $size?: 'sm' | 'md' | 'lg' }>`
   background: ${({ theme }) => theme.colors.background.primary};
   border-radius: ${({ theme }) => theme.borderRadius['2xl']};
   width: 100%;
-  max-width: ${({ $size }) => $size};
+  max-width: ${({ $size }) => {
+    switch ($size) {
+      case 'sm': return '400px'
+      case 'lg': return '800px'
+      default: return '600px'
+    }
+  }};
   max-height: 90vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  box-shadow: ${({ theme }) => theme.shadows.xl};
-`
-
-const ModalHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: ${({ theme }) => theme.spacing.lg} ${({ theme }) => theme.spacing.xl};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.primary.lighter};
-`
-
-const ModalTitle = styled.h2`
-  font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin: 0;
+  overflow-y: auto;
+  position: relative;
 `
 
 const CloseButton = styled.button`
+  position: absolute;
+  top: ${({ theme }) => theme.spacing.lg};
+  right: ${({ theme }) => theme.spacing.lg};
   width: 40px;
   height: 40px;
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  background: ${({ theme }) => theme.colors.background.card};
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${({ theme }) => theme.colors.text.secondary};
+  background: ${({ theme }) => theme.colors.background.secondary};
+  border: none;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  cursor: pointer;
   transition: all ${({ theme }) => theme.transitions.fast};
+  z-index: 1;
   
   &:hover {
-    background: ${({ theme }) => theme.colors.primary.light};
-    color: ${({ theme }) => theme.colors.white};
+    background: ${({ theme }) => theme.colors.background.cream};
+    transform: rotate(90deg);
   }
 `
 
-const ModalContent = styled.div`
-  padding: ${({ theme }) => theme.spacing.xl};
-  overflow-y: auto;
-  flex: 1;
+const ModalHeader = styled.div`
+  padding: ${({ theme }) => theme.spacing['2xl']};
+  padding-bottom: 0;
 `
 
-export const Modal: React.FC<ModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  children, 
-  title,
-  size = 'md' 
-}) => {
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      onClose()
-    }
-  }, [onClose])
+const ModalTitle = styled.h2`
+  font-size: ${({ theme }) => theme.fontSizes['2xl']};
+  padding-right: ${({ theme }) => theme.spacing['3xl']};
+`
 
+const ModalBody = styled.div`
+  padding: ${({ theme }) => theme.spacing['2xl']};
+`
+
+const ModalFooter = styled.div`
+  padding: ${({ theme }) => theme.spacing['2xl']};
+  padding-top: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: ${({ theme }) => theme.spacing.md};
+`
+
+interface ModalProps {
+  isOpen: boolean
+  onClose: () => void
+  title?: string
+  children: React.ReactNode
+  footer?: React.ReactNode
+  size?: 'sm' | 'md' | 'lg'
+}
+
+export const Modal: React.FC<ModalProps> = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+  footer,
+  size = 'md'
+}) => {
   useEffect(() => {
     if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown)
       document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
     }
     
     return () => {
-      document.removeEventListener('keydown', handleKeyDown)
       document.body.style.overflow = ''
     }
-  }, [isOpen, handleKeyDown])
-
+  }, [isOpen])
+  
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose()
+      }
+    }
+    
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape)
+    }
+    
+    return () => {
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [isOpen, onClose])
+  
   return (
     <AnimatePresence>
       {isOpen && (
@@ -115,31 +129,39 @@ export const Modal: React.FC<ModalProps> = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
           onClick={onClose}
         >
           <ModalContainer
-            $size={sizes[size]}
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            $size={size}
+            initial={{ opacity: 0, scale: 0.9, y: 40 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            onClick={(e) => e.stopPropagation()}
+            exit={{ opacity: 0, scale: 0.9, y: 40 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            onClick={e => e.stopPropagation()}
           >
+            <CloseButton onClick={onClose} aria-label="Close modal">
+              ✕
+            </CloseButton>
+            
             {title && (
               <ModalHeader>
                 <ModalTitle>{title}</ModalTitle>
-                <CloseButton onClick={onClose}>
-                  <X size={20} />
-                </CloseButton>
               </ModalHeader>
             )}
-            <ModalContent>
+            
+            <ModalBody>
               {children}
-            </ModalContent>
+            </ModalBody>
+            
+            {footer && (
+              <ModalFooter>
+                {footer}
+              </ModalFooter>
+            )}
           </ModalContainer>
         </Overlay>
       )}
     </AnimatePresence>
   )
 }
-

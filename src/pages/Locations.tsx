@@ -1,622 +1,563 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import styled from 'styled-components'
-import { motion, AnimatePresence } from 'framer-motion'
-import { MapPin, Phone, Clock, Navigation, ChevronRight, Star } from 'lucide-react'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
-import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import L from 'leaflet'
 
-// Types
-interface Location {
-  id: number
-  name: string
-  address: string
-  phone: string
-  hours: string
-  coordinates: [number, number]
-  image: string
-  rating: number
-}
-
-// Custom marker icons
-const createCustomIcon = (isActive: boolean) => {
-  return L.divIcon({
-    className: 'custom-marker',
-    html: `
+// Elegant minimal marker - "S" monogram style
+const createLogoIcon = (isActive: boolean) => L.divIcon({
+  className: 'custom-logo-marker',
+  html: `
+    <div style="
+      width: 36px;
+      height: 46px;
+      position: relative;
+    ">
+      <!-- Elegant rounded square with S -->
       <div style="
-        width: ${isActive ? '50px' : '40px'};
-        height: ${isActive ? '50px' : '40px'};
-        background: ${isActive 
-          ? 'linear-gradient(135deg, #7a4a5a 0%, #5a3545 100%)' 
-          : 'linear-gradient(135deg, #C9A86C 0%, #b89a5a 100%)'};
+        width: 36px;
+        height: 36px;
+        background: ${isActive ? 'linear-gradient(135deg, #C9A87C 0%, #B8956A 100%)' : 'linear-gradient(135deg, #1A1A1A 0%, #0A0A0A 100%)'};
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 8px 25px rgba(74, 44, 52, 0.4);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
         position: relative;
-        ${isActive ? `
-          border: 3px solid #C9A86C;
-        ` : ''}
+        transform: rotate(-8deg);
       ">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="10" r="3"></circle>
-          <path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"></path>
-        </svg>
+        <!-- Letter S -->
+        <span style="
+          font-family: 'Cormorant Garamond', Georgia, serif;
+          font-size: 20px;
+          font-weight: 300;
+          font-style: italic;
+          color: ${isActive ? '#0A0A0A' : '#C9A87C'};
+          transform: rotate(8deg);
+          text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        ">S</span>
+        
+        <!-- Shine -->
         <div style="
           position: absolute;
-          bottom: -10px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 0;
-          height: 0;
-          border-left: 10px solid transparent;
-          border-right: 10px solid transparent;
-          border-top: 12px solid ${isActive ? '#5a3545' : '#b89a5a'};
+          top: 3px;
+          left: 3px;
+          right: 50%;
+          bottom: 50%;
+          background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+          border-radius: 7px 3px 7px 3px;
         "></div>
       </div>
-    `,
-    iconSize: [isActive ? 50 : 40, isActive ? 60 : 50],
-    iconAnchor: [isActive ? 25 : 20, isActive ? 60 : 50],
-    popupAnchor: [0, -50],
-  })
-}
+      
+      <!-- Bottom pointer -->
+      <div style="
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 10px;
+        height: 10px;
+        background: ${isActive ? '#B8956A' : '#0A0A0A'};
+        clip-path: polygon(50% 100%, 0 0, 100% 0);
+      "></div>
+      
+      ${isActive ? `
+        <!-- Active ring -->
+        <div style="
+          position: absolute;
+          top: -5px;
+          left: -5px;
+          width: 46px;
+          height: 46px;
+          border: 2px solid #C9A87C;
+          border-radius: 14px;
+          transform: rotate(-8deg);
+          animation: pulse 2s ease-out infinite;
+        "></div>
+      ` : ''}
+    </div>
+  `,
+  iconSize: [36, 46],
+  iconAnchor: [18, 46],
+  popupAnchor: [0, -42],
+})
 
-// Calculate bounds to fit all locations
-const getAllLocationsBounds = (): [[number, number], [number, number]] => {
-  const lats = locations.map(l => l.coordinates[0])
-  const lngs = locations.map(l => l.coordinates[1])
-  return [
-    [Math.min(...lats) - 0.02, Math.min(...lngs) - 0.02],
-    [Math.max(...lats) + 0.02, Math.max(...lngs) + 0.02]
-  ]
-}
-
-// Component to fit all locations on initial load and update on selection
-const MapController: React.FC<{ 
-  selectedLocation: Location | null
-  showAll: boolean 
-}> = ({ selectedLocation, showAll }) => {
+// Component to fit bounds
+const FitBounds: React.FC<{ locations: Location[] }> = ({ locations }) => {
   const map = useMap()
   
   useEffect(() => {
-    if (showAll) {
-      // Fit all locations on initial load
-      const bounds = getAllLocationsBounds()
-      map.fitBounds(bounds, { padding: [50, 50], duration: 0.5 })
+    if (locations.length > 0) {
+      const bounds = L.latLngBounds(locations.map(loc => [loc.lat, loc.lng]))
+      map.fitBounds(bounds, { padding: [80, 80], maxZoom: 13 })
     }
-  }, [map, showAll])
-  
-  useEffect(() => {
-    if (selectedLocation && !showAll) {
-      map.flyTo(selectedLocation.coordinates, 15, { duration: 1 })
-    }
-  }, [selectedLocation, map, showAll])
+  }, [map, locations])
   
   return null
 }
 
-// Page Layout - Creative Design
-const PageWrapper = styled.div`
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f5ebe6 0%, #ede3dc 100%);
-`
-
-const PageHeader = styled.section`
-  padding-top: ${({ theme }) => theme.spacing['5xl']};
-  padding-bottom: ${({ theme }) => theme.spacing['3xl']};
-  background: 
-    linear-gradient(rgba(139, 69, 87, 0.85), rgba(167, 107, 91, 0.85)),
-    url('https://images.unsplash.com/photo-1559329007-40df8a9345d8?w=1920') center/cover no-repeat;
+// ============ HERO ============
+const HeroSection = styled(motion.section)`
   position: relative;
-`
-
-const HeaderContainer = styled.div`
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: ${({ theme }) => `${theme.spacing['3xl']} ${theme.spacing.xl}`};
-  text-align: center;
-`
-
-const PageTitle = styled(motion.h1)`
-  font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: ${({ theme }) => theme.fontSizes['5xl']};
-  color: ${({ theme }) => theme.colors.white};
-  margin-bottom: ${({ theme }) => theme.spacing.md};
-  
-  @media (max-width: 600px) {
-    font-size: 36px;
-  }
-`
-
-const PageSubtitle = styled(motion.p)`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  color: ${({ theme }) => theme.colors.primary.lighter};
-  max-width: 600px;
-  margin: 0 auto;
-`
-
-// Main Content
-const ContentWrapper = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1.5fr;
-  gap: 0;
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 0 40px 60px;
-  
-  @media (max-width: 1100px) {
-    grid-template-columns: 1fr;
-    gap: 40px;
-  }
-  
-  @media (max-width: 600px) {
-    padding: 0 20px 40px;
-  }
-`
-
-// Locations List
-const LocationsPanel = styled.div`
+  height: 50vh;
+  min-height: 400px;
   display: flex;
-  flex-direction: column;
-  gap: 20px;
-`
-
-const LocationCard = styled(motion.div)<{ $active: boolean }>`
-  background: ${({ $active }) => $active 
-    ? 'linear-gradient(135deg, #7a4a5a 0%, #5a3545 100%)' 
-    : 'linear-gradient(145deg, #fff 0%, #faf7f5 100%)'};
-  padding: 30px;
-  cursor: pointer;
-  transition: all 0.4s ease;
-  position: relative;
-  
-  ${({ $active }) => $active && `
-    &::before,
-    &::after {
-      content: '';
-      position: absolute;
-      width: 12px;
-      height: 12px;
-      border: 2px solid #C9A86C;
-    }
-    
-    &::before {
-      top: -6px;
-      left: -6px;
-      border-right: none;
-      border-bottom: none;
-    }
-    
-    &::after {
-      bottom: -6px;
-      right: -6px;
-      border-left: none;
-      border-top: none;
-    }
-  `}
-  
-  ${({ $active }) => !$active && `
-    border: 1px solid rgba(201, 168, 108, 0.2);
-    
-    &:hover {
-      border-color: #C9A86C;
-      transform: translateX(10px);
-    }
-  `}
-`
-
-const LocationHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 16px;
-`
-
-const LocationName = styled.h3<{ $active: boolean }>`
-  font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: 24px;
-  color: ${({ $active }) => $active ? '#fff' : '#4a2c34'};
-  font-weight: 400;
-  margin: 0;
-`
-
-const LocationRating = styled.div<{ $active: boolean }>`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 14px;
-  color: ${({ $active }) => $active ? '#C9A86C' : '#C9A86C'};
-  
-  svg {
-    fill: #C9A86C;
-  }
-`
-
-const LocationInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-`
-
-const LocationInfoItem = styled.div<{ $active: boolean }>`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 14px;
-  color: ${({ $active }) => $active ? 'rgba(255, 255, 255, 0.8)' : '#6b5055'};
-  
-  svg {
-    color: ${({ $active }) => $active ? '#C9A86C' : '#C9A86C'};
-    flex-shrink: 0;
-  }
-`
-
-const DirectionButton = styled.a<{ $active: boolean }>`
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 20px;
-  padding: 14px 28px;
-  background: ${({ $active }) => $active 
-    ? 'linear-gradient(135deg, #C9A86C 0%, #b89a5a 100%)' 
-    : 'transparent'};
-  border: ${({ $active }) => $active ? 'none' : '2px solid #d4c4bc'};
-  color: ${({ $active }) => $active ? '#fff' : '#7a4a5a'};
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 13px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    transform: translateX(5px);
-    ${({ $active }) => $active 
-      ? 'box-shadow: 0 6px 20px rgba(201, 168, 108, 0.4);' 
-      : 'border-color: #7a4a5a;'}
-  }
-`
-
-// Map Container - Creative Design
-const MapPanel = styled.div`
-  position: relative;
-  min-height: 600px;
-  background: linear-gradient(145deg, #fff 0%, #faf7f5 100%);
-  border: 1px solid rgba(201, 168, 108, 0.2);
+  align-items: flex-end;
+  background: ${({ theme }) => theme.colors.dark.main};
   overflow: hidden;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 15px;
-    border: 1px solid rgba(201, 168, 108, 0.2);
-    pointer-events: none;
-    z-index: 1000;
-  }
+`
+
+const HeroMedia = styled(motion.div)`
+  position: absolute;
+  inset: -100px;
   
   &::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-      135deg,
-      rgba(245, 230, 220, 0.15) 0%,
-      transparent 40%,
-      transparent 60%,
-      rgba(245, 230, 220, 0.15) 100%
-    );
-    pointer-events: none;
-    z-index: 999;
+    background: linear-gradient(180deg, rgba(10, 10, 10, 0.4) 0%, rgba(10, 10, 10, 0.8) 100%);
   }
   
-  @media (max-width: 1100px) {
-    min-height: 500px;
-  }
-  
-  .leaflet-container {
+  img {
     width: 100%;
     height: 100%;
-    min-height: 600px;
-    background: #f5ebe6;
-    filter: sepia(25%) saturate(80%) hue-rotate(-5deg) brightness(1.05);
-    
-    @media (max-width: 1100px) {
-      min-height: 500px;
-    }
+    object-fit: cover;
+  }
+`
+
+const HeroContent = styled(motion.div)`
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: ${({ theme }) => `${theme.spacing['4xl']} ${theme.spacing['3xl']}`};
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    padding: ${({ theme }) => `${theme.spacing['3xl']} ${theme.spacing.xl}`};
+  }
+`
+
+const HeroTitle = styled.h1`
+  font-size: clamp(2.5rem, 8vw, ${({ theme }) => theme.fontSizes['6xl']});
+  color: ${({ theme }) => theme.colors.text.white};
+  font-weight: ${({ theme }) => theme.fontWeights.light};
+  
+  span { font-style: italic; color: ${({ theme }) => theme.colors.primary.accent}; }
+`
+
+// ============ MAIN SECTION ============
+const MainSection = styled.section`
+  display: grid;
+  grid-template-columns: 450px 1fr;
+  min-height: 70vh;
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.desktop}) {
+    grid-template-columns: 1fr;
+  }
+`
+
+const LocationsList = styled.div`
+  background: ${({ theme }) => theme.colors.background.cream};
+  padding: ${({ theme }) => theme.spacing['3xl']};
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.xl};
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    padding: ${({ theme }) => theme.spacing['2xl']};
+  }
+`
+
+const LocationCard = styled(motion.div)<{ $active: boolean }>`
+  padding: ${({ theme }) => theme.spacing.lg};
+  background: ${({ $active, theme }) => $active ? theme.colors.dark.main : theme.colors.background.primary};
+  color: ${({ $active, theme }) => $active ? theme.colors.text.white : theme.colors.text.primary};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.lg};
+  border: 1px solid ${({ $active, theme }) => $active ? theme.colors.primary.accent : 'transparent'};
+  
+  &:hover {
+    background: ${({ $active, theme }) => $active ? theme.colors.dark.main : theme.colors.background.secondary};
+    transform: translateX(4px);
+  }
+`
+
+const LocationIcon = styled.a<{ $active: boolean }>`
+  width: 44px;
+  height: 44px;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  background: ${({ $active, theme }) => $active ? theme.colors.primary.accent : theme.colors.background.cream};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  text-decoration: none;
+  
+  span {
+    font-family: ${({ theme }) => theme.fonts.heading};
+    font-size: 18px;
+    font-style: italic;
+    color: ${({ $active, theme }) => $active ? theme.colors.dark.main : theme.colors.primary.accent};
+    transition: all 0.3s ease;
   }
   
-  .custom-marker {
+  &:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 15px rgba(201, 168, 124, 0.4);
+  }
+`
+
+const LocationInfo = styled.div`
+  flex: 1;
+  min-width: 0;
+`
+
+const LocationHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm};
+  margin-bottom: 4px;
+`
+
+const LocationName = styled.h3`
+  font-size: ${({ theme }) => theme.fontSizes.md};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`
+
+const LocationBadge = styled.span`
+  font-size: 8px;
+  padding: 2px 6px;
+  background: ${({ theme }) => theme.colors.primary.accent};
+  color: ${({ theme }) => theme.colors.dark.main};
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+`
+
+const LocationAddress = styled.p<{ $active: boolean }>`
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: ${({ $active, theme }) => $active ? theme.colors.text.cream : theme.colors.text.light};
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`
+
+const LocationMeta = styled.div<{ $active: boolean }>`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing.md};
+  margin-top: 6px;
+  font-size: 11px;
+  color: ${({ $active, theme }) => $active ? theme.colors.text.cream : theme.colors.text.muted};
+  
+  span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+`
+
+const LocationArrow = styled.div<{ $active: boolean }>`
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${({ $active, theme }) => $active ? theme.colors.primary.accent : theme.colors.text.muted};
+  font-size: 18px;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+`
+
+const MapPanel = styled.div`
+  position: relative;
+  z-index: 1; /* Keep below navigation */
+  
+  .leaflet-container {
+    height: 100%;
+    width: 100%;
+    min-height: 500px;
+    z-index: 1 !important; /* Override Leaflet's default z-index */
+  }
+  
+  /* Custom marker animation */
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1.8); opacity: 0; }
+  }
+  
+  .custom-logo-marker {
     background: transparent !important;
     border: none !important;
   }
   
+  /* Custom map styling */
+  .leaflet-control-zoom {
+    border: none !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+    border-radius: 12px !important;
+    overflow: hidden;
+  }
+  
+  .leaflet-control-zoom-in,
+  .leaflet-control-zoom-out {
+    background: ${({ theme }) => theme.colors.dark.main} !important;
+    color: ${({ theme }) => theme.colors.text.white} !important;
+    border: none !important;
+    width: 36px !important;
+    height: 36px !important;
+    line-height: 36px !important;
+    font-size: 18px !important;
+    
+    &:hover {
+      background: ${({ theme }) => theme.colors.primary.accent} !important;
+      color: ${({ theme }) => theme.colors.dark.main} !important;
+    }
+  }
+  
   .leaflet-popup-content-wrapper {
-    background: linear-gradient(145deg, #fff 0%, #faf7f5 100%);
-    border: 1px solid rgba(201, 168, 108, 0.3);
-    border-radius: 0;
-    box-shadow: 0 10px 40px rgba(74, 44, 52, 0.2);
+    background: ${({ theme }) => theme.colors.dark.main};
+    color: ${({ theme }) => theme.colors.text.white};
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    padding: 8px;
   }
   
   .leaflet-popup-content {
-    margin: 16px 20px;
-    font-family: 'Inconsolata', monospace;
+    margin: 12px 16px;
+    font-family: inherit;
+    
+    strong {
+      color: ${({ theme }) => theme.colors.primary.accent};
+      font-size: 14px;
+      display: block;
+      margin-bottom: 4px;
+    }
   }
   
   .leaflet-popup-tip {
-    background: #fff;
-    border: 1px solid rgba(201, 168, 108, 0.3);
-    box-shadow: none;
+    background: ${({ theme }) => theme.colors.dark.main};
   }
   
-  .leaflet-control-zoom {
-    border: none !important;
-    box-shadow: 0 4px 15px rgba(74, 44, 52, 0.15) !important;
-  }
-  
-  .leaflet-control-zoom a {
-    background: linear-gradient(145deg, #fff 0%, #faf7f5 100%) !important;
-    color: #7a4a5a !important;
-    border: 1px solid rgba(201, 168, 108, 0.3) !important;
+  .leaflet-popup-close-button {
+    color: ${({ theme }) => theme.colors.text.cream} !important;
     
     &:hover {
-      background: #7a4a5a !important;
-      color: #fff !important;
+      color: ${({ theme }) => theme.colors.primary.accent} !important;
     }
   }
-`
-
-const MapLegend = styled.div`
-  position: absolute;
-  bottom: 30px;
-  left: 30px;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 247, 245, 0.95) 100%);
-  padding: 20px 25px;
-  border: 1px solid rgba(201, 168, 108, 0.3);
-  z-index: 1000;
-  backdrop-filter: blur(10px);
   
-  h5 {
-    font-family: ${({ theme }) => theme.fonts.heading};
-    font-size: 14px;
-    color: #4a2c34;
-    margin-bottom: 12px;
-    font-weight: 400;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+  @media (max-width: ${({ theme }) => theme.breakpoints.desktop}) {
+    min-height: 400px;
+    .leaflet-container { min-height: 400px; }
   }
 `
 
-const LegendItem = styled.div`
+// ============ DELIVERY ============
+const DeliverySection = styled.section`
+  background: ${({ theme }) => theme.colors.dark.main};
+  padding: ${({ theme }) => `${theme.spacing['4xl']} ${theme.spacing['3xl']}`};
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    padding: ${({ theme }) => `${theme.spacing['3xl']} ${theme.spacing.xl}`};
+  }
+`
+
+const DeliveryContainer = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+`
+
+const DeliveryTitle = styled.h2`
+  font-size: ${({ theme }) => theme.fontSizes['3xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.light};
+  color: ${({ theme }) => theme.colors.text.white};
+  margin-bottom: ${({ theme }) => theme.spacing['2xl']};
+  
+  span { font-style: italic; color: ${({ theme }) => theme.colors.primary.accent}; }
+`
+
+const DeliveryGrid = styled.div`
   display: flex;
-  align-items: center;
-  gap: 10px;
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 12px;
-  color: #6b5055;
-  margin-bottom: 8px;
+  justify-content: center;
+  gap: ${({ theme }) => theme.spacing.xl};
+  flex-wrap: wrap;
+`
+
+const DeliveryItem = styled(motion.a)`
+  padding: ${({ theme }) => `${theme.spacing.lg} ${theme.spacing['2xl']}`};
+  border: 1px solid ${({ theme }) => theme.colors.dividerLight};
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  color: ${({ theme }) => theme.colors.text.cream};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  transition: all ${({ theme }) => theme.transitions.fast};
   
-  &:last-child {
-    margin-bottom: 0;
+  &:hover {
+    background: ${({ theme }) => theme.colors.primary.main};
+    border-color: ${({ theme }) => theme.colors.primary.main};
+    color: ${({ theme }) => theme.colors.dark.main};
+    transform: scale(1.05);
   }
 `
 
-const LegendDot = styled.div<{ $type: 'active' | 'default' }>`
-  width: 14px;
-  height: 14px;
-  background: ${({ $type }) => $type === 'active' 
-    ? 'linear-gradient(135deg, #7a4a5a 0%, #5a3545 100%)'
-    : 'linear-gradient(135deg, #C9A86C 0%, #b89a5a 100%)'};
-`
+// ============ COMPONENT ============
+interface Location {
+  id: number
+  name: string
+  address: string
+  hours: string
+  phone: string
+  lat: number
+  lng: number
+  flagship?: boolean
+}
 
-const PopupContent = styled.div`
-  h4 {
-    font-family: 'IM Fell English', Georgia, serif;
-    font-size: 16px;
-    font-weight: 400;
-    color: #4a2c34;
-    margin: 0 0 8px 0;
-  }
+const Locations: React.FC = () => {
+  const locations: Location[] = [
+    { id: 1, name: 'Socials Shevchenko', address: '36 A Taras Shevchenko street, Tashkent', hours: '08:00 - 23:00', phone: '+998 99 901 44 33', lat: 41.311081, lng: 69.279737, flagship: true },
+    { id: 2, name: 'Socials Mirzo Ulugbek', address: '15 Mirzo Ulugbek street, Tashkent', hours: '08:00 - 22:00', phone: '+998 99 901 44 34', lat: 41.338540, lng: 69.334890 },
+  ]
   
-  p {
-    font-family: 'Inconsolata', monospace;
-    font-size: 13px;
-    color: #8b6b6b;
-    margin: 0;
-  }
-`
-
-// Sample data
-const locations: Location[] = [
-  {
-    id: 1,
-    name: 'Socials Арбат',
-    address: 'г. Москва, ул. Арбат, д. 10',
-    phone: '+7 (495) 123-45-67',
-    hours: 'Ежедневно: 09:00 — 22:00',
-    coordinates: [55.7520, 37.5873],
-    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600',
-    rating: 4.9
-  },
-  {
-    id: 2,
-    name: 'Socials Тверская',
-    address: 'г. Москва, ул. Тверская, д. 25',
-    phone: '+7 (495) 234-56-78',
-    hours: 'Ежедневно: 08:00 — 23:00',
-    coordinates: [55.7648, 37.6046],
-    image: 'https://images.unsplash.com/photo-1559329007-40df8a9345d8?w=600',
-    rating: 4.8
-  },
-  {
-    id: 3,
-    name: 'Socials Патриаршие',
-    address: 'г. Москва, Патриаршие пруды, д. 5',
-    phone: '+7 (495) 345-67-89',
-    hours: 'Ежедневно: 10:00 — 21:00',
-    coordinates: [55.7640, 37.5911],
-    image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=600',
-    rating: 4.9
-  },
-  {
-    id: 4,
-    name: 'Socials Кузнецкий',
-    address: 'г. Москва, ул. Кузнецкий мост, д. 3',
-    phone: '+7 (495) 456-78-90',
-    hours: 'Пн-Сб: 09:00 — 22:00',
-    coordinates: [55.7605, 37.6214],
-    image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=600',
-    rating: 4.7
-  },
-]
-
-export const Locations: React.FC = () => {
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
-  const [showAllLocations, setShowAllLocations] = useState(true)
-
-  const handleLocationSelect = (location: Location) => {
-    setSelectedLocation(location)
-    setShowAllLocations(false)
-  }
-
-  const getGoogleMapsUrl = (location: Location) => {
-    return `https://www.google.com/maps/dir/?api=1&destination=${location.coordinates[0]},${location.coordinates[1]}`
-  }
-
+  const [activeLocation, setActiveLocation] = useState(locations[0])
+  
+  // Parallax
+  const heroRef = useRef<HTMLElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
+  })
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, 150])
+  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 1.1])
+  
   return (
-    <PageWrapper>
-      <PageHeader>
-        <HeaderContainer>
-          <PageTitle
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            Наши Филиалы
-          </PageTitle>
-          <PageSubtitle
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-          >
-            Выберите ближайшую кондитерскую для посещения
-          </PageSubtitle>
-        </HeaderContainer>
-      </PageHeader>
-
-      <ContentWrapper>
-        <LocationsPanel>
-          {locations.map((location, index) => (
+    <>
+      <HeroSection ref={heroRef}>
+        <HeroMedia style={{ y: heroY, scale: heroScale }}>
+          <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1920&q=80" alt="" />
+        </HeroMedia>
+        <HeroContent
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <HeroTitle>Find <span>Us</span></HeroTitle>
+        </HeroContent>
+      </HeroSection>
+      
+      <MainSection>
+        <LocationsList>
+          {locations.map((location, i) => (
             <LocationCard
               key={location.id}
-              $active={selectedLocation?.id === location.id}
-              onClick={() => handleLocationSelect(location)}
-              initial={{ opacity: 0, x: -30 }}
+              $active={activeLocation.id === location.id}
+              onClick={() => setActiveLocation(location)}
+              initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
+              transition={{ duration: 0.4, delay: i * 0.1 }}
             >
-              <LocationHeader>
-                <LocationName $active={selectedLocation?.id === location.id}>
-                  {location.name}
-                </LocationName>
-                <LocationRating $active={selectedLocation?.id === location.id}>
-                  <Star size={14} />
-                  {location.rating}
-                </LocationRating>
-              </LocationHeader>
+              <LocationIcon 
+                $active={activeLocation.id === location.id}
+                href={`https://maps.google.com/maps/dir/?api=1&destination=${location.lat},${location.lng}`}
+                target="_blank"
+                onClick={(e) => e.stopPropagation()}
+                title="Построить маршрут"
+              >
+                <span>S</span>
+              </LocationIcon>
               
               <LocationInfo>
-                <LocationInfoItem $active={selectedLocation?.id === location.id}>
-                  <MapPin size={16} />
-                  <span>{location.address}</span>
-                </LocationInfoItem>
-                <LocationInfoItem $active={selectedLocation?.id === location.id}>
-                  <Phone size={16} />
-                  <span>{location.phone}</span>
-                </LocationInfoItem>
-                <LocationInfoItem $active={selectedLocation?.id === location.id}>
-                  <Clock size={16} />
-                  <span>{location.hours}</span>
-                </LocationInfoItem>
+                <LocationHeader>
+                  <LocationName>{location.name}</LocationName>
+                  {location.flagship && <LocationBadge>★</LocationBadge>}
+                </LocationHeader>
+                <LocationAddress $active={activeLocation.id === location.id}>
+                  {location.address}
+                </LocationAddress>
+                <LocationMeta $active={activeLocation.id === location.id}>
+                  <span>🕐 {location.hours}</span>
+                  <span>📞 {location.phone}</span>
+                </LocationMeta>
               </LocationInfo>
               
-              <AnimatePresence>
-                {selectedLocation?.id === location.id && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                  >
-                    <DirectionButton 
-                      $active={true}
-                      href={getGoogleMapsUrl(location)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Navigation size={16} />
-                      Проложить маршрут
-                      <ChevronRight size={16} />
-                    </DirectionButton>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <LocationArrow $active={activeLocation.id === location.id}>
+                →
+              </LocationArrow>
             </LocationCard>
           ))}
-        </LocationsPanel>
-
+        </LocationsList>
+        
         <MapPanel>
-          <MapContainer
-            center={[55.7600, 37.6000]}
-            zoom={12}
-            scrollWheelZoom={true}
-            style={{ height: '100%', width: '100%' }}
+          <MapContainer 
+            center={[41.32, 69.30]} 
+            zoom={12} 
+            scrollWheelZoom={false}
+            zoomControl={true}
           >
-            {/* OpenStreetMap - free, no API key required */}
+            <FitBounds locations={locations} />
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>'
+              url="https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png"
             />
-            
-            <MapController 
-              selectedLocation={selectedLocation} 
-              showAll={showAllLocations}
-            />
-            
-            {locations.map((location) => (
-              <Marker
-                key={location.id}
-                position={location.coordinates}
-                icon={createCustomIcon(selectedLocation?.id === location.id)}
+            {locations.map(loc => (
+              <Marker 
+                key={loc.id} 
+                position={[loc.lat, loc.lng]} 
+                icon={createLogoIcon(activeLocation.id === loc.id)}
                 eventHandlers={{
-                  click: () => handleLocationSelect(location),
+                  click: () => setActiveLocation(loc)
                 }}
               >
                 <Popup>
-                  <PopupContent>
-                    <h4>{location.name}</h4>
-                    <p>{location.address}</p>
-                  </PopupContent>
+                  <strong>{loc.name}</strong>
+                  <br />
+                  {loc.address}
+                  <br />
+                  <span style={{ opacity: 0.7, fontSize: '12px' }}>🕐 {loc.hours}</span>
                 </Popup>
               </Marker>
             ))}
           </MapContainer>
-          
-          <MapLegend>
-            <h5>Легенда</h5>
-            <LegendItem>
-              <LegendDot $type="active" />
-              <span>Выбранный филиал</span>
-            </LegendItem>
-            <LegendItem>
-              <LegendDot $type="default" />
-              <span>Другие филиалы</span>
-            </LegendItem>
-          </MapLegend>
         </MapPanel>
-      </ContentWrapper>
-    </PageWrapper>
+      </MainSection>
+      
+      <DeliverySection>
+        <DeliveryContainer>
+          <DeliveryTitle>Order <span>Delivery</span></DeliveryTitle>
+          <DeliveryGrid>
+            {['Wolt', 'Yandex Eats', 'Express24'].map((service, i) => (
+              <DeliveryItem
+                key={service}
+                href="#"
+                target="_blank"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+              >
+                {service}
+              </DeliveryItem>
+            ))}
+          </DeliveryGrid>
+        </DeliveryContainer>
+      </DeliverySection>
+    </>
   )
 }
+
+export default Locations

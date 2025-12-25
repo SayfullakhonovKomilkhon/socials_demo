@@ -1,758 +1,720 @@
-import { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import styled from 'styled-components'
-import { motion } from 'framer-motion'
-import { Phone, Mail, MapPin, Clock, Send, Instagram, MessageCircle } from 'lucide-react'
+import { motion, useScroll, useTransform } from 'framer-motion'
 
-// Page Header with Background Image
-const PageHeader = styled.section`
-  padding-top: ${({ theme }) => theme.spacing['5xl']};
-  padding-bottom: ${({ theme }) => theme.spacing['3xl']};
-  background: 
-    linear-gradient(rgba(139, 69, 87, 0.85), rgba(167, 107, 91, 0.85)),
-    url('https://images.unsplash.com/photo-1423666639041-f56000c27a9a?w=1920') center/cover no-repeat;
+// ============ HERO ============
+const HeroSection = styled(motion.section)`
   position: relative;
-`
-
-const HeaderContainer = styled.div`
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: ${({ theme }) => `${theme.spacing['3xl']} ${theme.spacing.xl}`};
-  text-align: center;
-`
-
-const PageTitle = styled(motion.h1)`
-  font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: ${({ theme }) => theme.fontSizes['5xl']};
-  color: ${({ theme }) => theme.colors.white};
-  margin-bottom: ${({ theme }) => theme.spacing.md};
-`
-
-const PageSubtitle = styled(motion.p)`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  color: ${({ theme }) => theme.colors.primary.lighter};
-  max-width: 600px;
-  margin: 0 auto;
-`
-
-// Page Content
-const PageWrapper = styled.div`
-  background: linear-gradient(135deg, #f5ebe6 0%, #ede3dc 100%);
-  padding: 80px 40px;
-  
-  @media (max-width: 768px) {
-    padding: 60px 20px;
-  }
-`
-
-const ContentContainer = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-`
-
-const SectionTitle = styled.div`
-  text-align: center;
-  margin-bottom: 60px;
-  
-  h2 {
-    font-family: ${({ theme }) => theme.fonts.heading};
-    font-size: 42px;
-    color: #4a2c34;
-    font-weight: 400;
-    margin-bottom: 15px;
-    
-    span {
-      color: #C9A86C;
-    }
-  }
-  
-  &::after {
-    content: '✦ ✦ ✦';
-    display: block;
-    font-size: 12px;
-    color: #C9A86C;
-    letter-spacing: 8px;
-    margin-top: 20px;
-  }
-`
-
-const ContactGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1.2fr;
-  gap: 50px;
-  
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-    gap: 40px;
-  }
-`
-
-// Contact Info Cards
-const ContactInfoSection = styled.div`
+  height: 50vh;
+  min-height: 400px;
   display: flex;
-  flex-direction: column;
-  gap: 25px;
+  align-items: flex-end;
+  background: ${({ theme }) => theme.colors.dark.main};
+  overflow: hidden;
 `
 
-const ContactCard = styled(motion.div)`
-  background: linear-gradient(145deg, #fff 0%, #faf7f5 100%);
-  padding: 30px;
-  display: flex;
-  align-items: flex-start;
-  gap: 24px;
-  border: 1px solid rgba(201, 168, 108, 0.2);
-  position: relative;
-  transition: all 0.4s ease;
+const HeroMedia = styled(motion.div)`
+  position: absolute;
+  inset: -100px;
   
-  &:hover {
-    border-color: #C9A86C;
-    transform: translateX(10px);
-    
-    &::before,
-    &::after {
-      opacity: 1;
-    }
-  }
-  
-  &::before,
   &::after {
     content: '';
     position: absolute;
-    width: 10px;
-    height: 10px;
-    border: 2px solid #C9A86C;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(10, 10, 10, 0.4) 0%, rgba(10, 10, 10, 0.8) 100%);
   }
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`
+
+const HeroContent = styled(motion.div)`
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: ${({ theme }) => `${theme.spacing['4xl']} ${theme.spacing['3xl']}`};
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    padding: ${({ theme }) => `${theme.spacing['3xl']} ${theme.spacing.xl}`};
+  }
+`
+
+const HeroTitle = styled.h1`
+  font-size: clamp(2.5rem, 8vw, ${({ theme }) => theme.fontSizes['6xl']});
+  color: ${({ theme }) => theme.colors.text.white};
+  font-weight: ${({ theme }) => theme.fontWeights.light};
+  
+  span { font-style: italic; color: ${({ theme }) => theme.colors.primary.accent}; }
+`
+
+// ============ MAIN SECTION ============
+const MainSection = styled.section`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.desktop}) {
+    grid-template-columns: 1fr;
+  }
+`
+
+// ============ INFO ============
+const InfoSection = styled.div`
+  background: ${({ theme }) => theme.colors.background.cream};
+  padding: ${({ theme }) => `${theme.spacing['4xl']} ${theme.spacing['3xl']}`};
+  position: relative;
+  overflow: hidden;
+  
+  /* Decorative circle */
+  &::before {
+    content: '';
+    position: absolute;
+    top: -200px;
+    right: -200px;
+    width: 500px;
+    height: 500px;
+    border: 1px solid ${({ theme }) => theme.colors.primary.accent};
+    border-radius: 50%;
+    opacity: 0.1;
+  }
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    padding: ${({ theme }) => `${theme.spacing['3xl']} ${theme.spacing.xl}`};
+  }
+`
+
+const InfoInner = styled.div`
+  max-width: 500px;
+  position: relative;
+  z-index: 1;
+`
+
+const SectionTag = styled(motion.span)`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm};
+  font-size: 11px;
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: ${({ theme }) => theme.colors.primary.accent};
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
   
   &::before {
-    top: -5px;
-    left: -5px;
-    border-right: none;
-    border-bottom: none;
+    content: '';
+    width: 30px;
+    height: 1px;
+    background: ${({ theme }) => theme.colors.primary.accent};
+  }
+`
+
+const SectionTitle = styled(motion.h2)`
+  font-size: clamp(2rem, 4vw, ${({ theme }) => theme.fontSizes['4xl']});
+  font-weight: ${({ theme }) => theme.fontWeights.light};
+  margin-bottom: ${({ theme }) => theme.spacing.xl};
+  line-height: 1.2;
+  
+  span { 
+    font-style: italic; 
+    color: ${({ theme }) => theme.colors.primary.accent};
+  }
+`
+
+const InfoText = styled(motion.p)`
+  font-size: ${({ theme }) => theme.fontSizes.md};
+  color: ${({ theme }) => theme.colors.text.secondary};
+  line-height: 1.8;
+  margin-bottom: ${({ theme }) => theme.spacing['3xl']};
+`
+
+const ContactItems = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.md};
+  margin-bottom: ${({ theme }) => theme.spacing['2xl']};
+`
+
+const ContactItem = styled(motion.a)`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.lg};
+  padding: ${({ theme }) => theme.spacing.lg};
+  background: ${({ theme }) => theme.colors.background.primary};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: ${({ theme }) => theme.colors.primary.accent};
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
   }
   
-  &::after {
-    bottom: -5px;
-    right: -5px;
-    border-left: none;
-    border-top: none;
+  &:hover {
+    transform: translateX(8px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    
+    &::before {
+      transform: scaleY(1);
+    }
   }
 `
 
 const ContactIcon = styled.div`
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #7a4a5a 0%, #5a3545 100%);
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary.accent} 0%, #B8956A 100%);
+  border-radius: ${({ theme }) => theme.borderRadius.md};
   flex-shrink: 0;
-  position: relative;
   
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 3px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+  svg {
+    width: 22px;
+    height: 22px;
+    stroke: ${({ theme }) => theme.colors.dark.main};
+    stroke-width: 1.5;
+    fill: none;
   }
 `
 
-const ContactDetails = styled.div`
+const ContactInfo = styled.div`
   flex: 1;
-  
-  h4 {
-    font-family: ${({ theme }) => theme.fonts.heading};
-    font-size: 20px;
-    color: #4a2c34;
-    margin-bottom: 10px;
-    font-weight: 400;
-  }
-  
-  p {
-    font-family: ${({ theme }) => theme.fonts.body};
-    font-size: 15px;
-    color: #6b5055;
-    line-height: 1.7;
-    margin: 0;
-  }
-  
-  a {
-    color: #7a4a5a;
-    text-decoration: none;
-    transition: color 0.3s ease;
-    
-    &:hover {
-      color: #C9A86C;
-    }
-  }
 `
 
-// Social Links
-const SocialSection = styled.div`
-  margin-top: 20px;
-  padding-top: 30px;
-  border-top: 1px solid rgba(201, 168, 108, 0.2);
+const ContactLabel = styled.span`
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: ${({ theme }) => theme.colors.text.muted};
+  margin-bottom: 4px;
 `
 
-const SocialTitle = styled.h4`
-  font-family: ${({ theme }) => theme.fonts.heading};
+const ContactValue = styled.span`
+  font-size: ${({ theme }) => theme.fontSizes.md};
+  color: ${({ theme }) => theme.colors.text.primary};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+`
+
+const ContactArrow = styled.span`
   font-size: 18px;
-  color: #4a2c34;
-  font-weight: 400;
-  margin-bottom: 20px;
+  color: ${({ theme }) => theme.colors.text.muted};
+  transition: all 0.3s ease;
+  
+  ${ContactItem}:hover & {
+    color: ${({ theme }) => theme.colors.primary.accent};
+    transform: translateX(4px);
+  }
+`
+
+const Divider = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: ${({ theme }) => theme.spacing.md};
+  margin: ${({ theme }) => theme.spacing['2xl']} 0;
   
-  &::before,
-  &::after {
-    content: '◆';
-    font-size: 8px;
-    color: #C9A86C;
+  &::before, &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: ${({ theme }) => theme.colors.divider};
+  }
+  
+  span {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: ${({ theme }) => theme.colors.text.muted};
   }
 `
 
 const SocialLinks = styled.div`
   display: flex;
-  gap: 15px;
+  gap: ${({ theme }) => theme.spacing.md};
 `
 
 const SocialLink = styled(motion.a)`
-  width: 55px;
-  height: 55px;
-  background: linear-gradient(135deg, #C9A86C 0%, #b89a5a 100%);
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  position: relative;
+  background: ${({ theme }) => theme.colors.dark.main};
+  border-radius: 50%;
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  
+  svg {
+    width: 20px;
+    height: 20px;
+    stroke: ${({ theme }) => theme.colors.text.cream};
+    stroke-width: 1.5;
+    fill: none;
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
+  }
   
   &::before {
     content: '';
     position: absolute;
-    inset: 3px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    transition: all 0.3s ease;
+    inset: 0;
+    background: ${({ theme }) => theme.colors.primary.accent};
+    transform: scale(0);
+    border-radius: 50%;
+    transition: transform 0.3s ease;
   }
   
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(201, 168, 108, 0.4);
+    transform: translateY(-4px);
     
     &::before {
-      inset: 5px;
+      transform: scale(1);
+    }
+    
+    svg {
+      stroke: ${({ theme }) => theme.colors.dark.main};
     }
   }
 `
 
-// Contact Form
-const FormSection = styled(motion.div)`
-  background: linear-gradient(145deg, #fff 0%, #faf7f5 100%);
-  padding: 50px;
-  border: 1px solid rgba(201, 168, 108, 0.2);
+// ============ FORM ============
+const FormSection = styled.div`
+  background: ${({ theme }) => theme.colors.dark.main};
+  padding: ${({ theme }) => `${theme.spacing['4xl']} ${theme.spacing['3xl']}`};
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    border: 2px solid #C9A86C;
-  }
-  
+  /* Large S watermark */
   &::before {
-    top: -10px;
-    left: -10px;
-    border-right: none;
-    border-bottom: none;
+    content: 'S';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: ${({ theme }) => theme.fonts.heading};
+    font-size: 400px;
+    font-style: italic;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.02);
+    pointer-events: none;
   }
   
-  &::after {
-    bottom: -10px;
-    right: -10px;
-    border-left: none;
-    border-top: none;
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    padding: ${({ theme }) => `${theme.spacing['3xl']} ${theme.spacing.xl}`};
   }
+`
+
+const FormInner = styled(motion.form)`
+  max-width: 420px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+`
+
+const FormHeader = styled.div`
+  text-align: center;
+  margin-bottom: ${({ theme }) => theme.spacing['2xl']};
+`
+
+const FormIcon = styled.div`
+  width: 64px;
+  height: 64px;
+  margin: 0 auto ${({ theme }) => theme.spacing.lg};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary.accent} 0%, #B8956A 100%);
+  border-radius: 50%;
   
-  @media (max-width: 600px) {
-    padding: 30px;
+  svg {
+    width: 28px;
+    height: 28px;
+    stroke: ${({ theme }) => theme.colors.dark.main};
+    stroke-width: 1.5;
+    fill: none;
   }
 `
 
 const FormTitle = styled.h3`
-  font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: 32px;
-  color: #4a2c34;
-  font-weight: 400;
-  margin-bottom: 10px;
-  text-align: center;
+  font-size: ${({ theme }) => theme.fontSizes['2xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.light};
+  color: ${({ theme }) => theme.colors.text.white};
+  margin-bottom: ${({ theme }) => theme.spacing.sm};
   
   span {
-    color: #C9A86C;
+    font-style: italic;
+    color: ${({ theme }) => theme.colors.primary.accent};
   }
 `
 
 const FormSubtitle = styled.p`
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 14px;
-  color: #8b6b6b;
-  text-align: center;
-  margin-bottom: 35px;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.text.muted};
 `
 
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-`
-
-const FormRow = styled.div`
+const FormGrid = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  
-  @media (max-width: 600px) {
-    grid-template-columns: 1fr;
-  }
+  gap: ${({ theme }) => theme.spacing.lg};
 `
 
 const FormGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  position: relative;
 `
 
-const Label = styled.label`
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 12px;
-  color: #7a4a5a;
+const FormLabel = styled.label`
+  position: absolute;
+  left: 16px;
+  top: -8px;
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  
-  &::before {
-    content: '◆';
-    font-size: 6px;
-    color: #C9A86C;
-  }
+  color: ${({ theme }) => theme.colors.primary.accent};
+  background: ${({ theme }) => theme.colors.dark.main};
+  padding: 0 8px;
 `
 
-const Input = styled.input`
-  padding: 16px 20px;
-  border: 2px solid #d4c4bc;
-  background: transparent;
+const FormInput = styled.input`
+  width: 100%;
+  padding: ${({ theme }) => `${theme.spacing.lg} ${theme.spacing.lg}`};
+  font-size: ${({ theme }) => theme.fontSizes.md};
   font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 15px;
-  color: #4a2c34;
+  color: ${({ theme }) => theme.colors.text.white};
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  outline: none;
   transition: all 0.3s ease;
   
-  &:focus {
-    outline: none;
-    border-color: #7a4a5a;
-    background: rgba(255, 255, 255, 0.5);
+  &::placeholder { 
+    color: ${({ theme }) => theme.colors.text.muted}; 
+    opacity: 0.5;
   }
   
-  &::placeholder {
-    color: #a08080;
-    font-style: italic;
+  &:focus {
+    border-color: ${({ theme }) => theme.colors.primary.accent};
+    box-shadow: 0 0 0 3px rgba(201, 168, 124, 0.1);
   }
 `
 
-const Textarea = styled.textarea`
-  padding: 16px 20px;
-  border: 2px solid #d4c4bc;
-  background: transparent;
+const FormTextarea = styled.textarea`
+  width: 100%;
+  padding: ${({ theme }) => theme.spacing.lg};
+  font-size: ${({ theme }) => theme.fontSizes.md};
   font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 15px;
-  color: #4a2c34;
-  min-height: 150px;
-  resize: vertical;
+  color: ${({ theme }) => theme.colors.text.white};
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  outline: none;
+  resize: none;
+  min-height: 120px;
   transition: all 0.3s ease;
   
-  &:focus {
-    outline: none;
-    border-color: #7a4a5a;
-    background: rgba(255, 255, 255, 0.5);
+  &::placeholder { 
+    color: ${({ theme }) => theme.colors.text.muted}; 
+    opacity: 0.5;
   }
   
-  &::placeholder {
-    color: #a08080;
-    font-style: italic;
+  &:focus {
+    border-color: ${({ theme }) => theme.colors.primary.accent};
+    box-shadow: 0 0 0 3px rgba(201, 168, 124, 0.1);
   }
 `
 
-const SubmitButton = styled.button`
-  padding: 20px 50px;
-  background: linear-gradient(135deg, #7a4a5a 0%, #5a3545 100%);
-  border: none;
-  color: #fff;
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 14px;
-  font-weight: 500;
+const SubmitButton = styled(motion.button)`
+  width: 100%;
+  padding: ${({ theme }) => theme.spacing.lg};
+  margin-top: ${({ theme }) => theme.spacing.xl};
+  font-size: 12px;
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
   text-transform: uppercase;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.15em;
+  color: ${({ theme }) => theme.colors.dark.main};
+  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary.accent} 0%, #D4B896 100%);
+  border: none;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
   cursor: pointer;
-  transition: all 0.4s ease;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
-  position: relative;
-  overflow: hidden;
-  margin-top: 10px;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: all 0.3s ease;
-  }
-  
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s ease;
-  }
+  gap: ${({ theme }) => theme.spacing.sm};
   
   &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 15px 40px rgba(122, 74, 90, 0.35);
-    
-    &::before {
-      inset: 6px;
-    }
-    
-    &::after {
-      left: 100%;
-    }
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(201, 168, 124, 0.3);
+  }
+  
+  &:active {
+    transform: translateY(0);
   }
 `
 
-// Success Message
 const SuccessMessage = styled(motion.div)`
+  background: rgba(201, 168, 124, 0.1);
+  border: 1px solid ${({ theme }) => theme.colors.primary.accent};
+  color: ${({ theme }) => theme.colors.primary.accent};
+  padding: ${({ theme }) => theme.spacing.lg};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
   text-align: center;
-  padding: 50px 30px;
-`
-
-const SuccessIcon = styled(motion.div)`
-  width: 90px;
-  height: 90px;
-  background: linear-gradient(135deg, #7a4a5a 0%, #5a3545 100%);
-  margin: 0 auto 30px;
+  margin-bottom: ${({ theme }) => theme.spacing.xl};
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  font-size: 40px;
-  position: relative;
-  
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    border: 2px solid #C9A86C;
-  }
-  
-  &::before {
-    top: -6px;
-    left: -6px;
-    border-right: none;
-    border-bottom: none;
-  }
-  
-  &::after {
-    bottom: -6px;
-    right: -6px;
-    border-left: none;
-    border-top: none;
-  }
+  gap: ${({ theme }) => theme.spacing.sm};
 `
 
-const SuccessTitle = styled.h4`
-  font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: 28px;
-  color: #4a2c34;
-  font-weight: 400;
-  margin-bottom: 15px;
-`
-
-const SuccessText = styled.p`
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 16px;
-  color: #6b5055;
-  line-height: 1.7;
-`
-
-export const Contact: React.FC = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    subject: '',
-    message: '',
+// ============ COMPONENT ============
+const Contact: React.FC = () => {
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' })
+  const [submitted, setSubmitted] = useState(false)
+  
+  // Parallax
+  const heroRef = useRef<HTMLElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
   })
-  const [isSubmitted, setIsSubmitted] = useState(false)
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, 150])
+  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 1.1])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSubmitted(true)
-  }
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    })
+    setSubmitted(true)
+    setFormData({ name: '', email: '', message: '' })
+    setTimeout(() => setSubmitted(false), 5000)
   }
 
   return (
     <>
-      <PageHeader>
-        <HeaderContainer>
-          <PageTitle
-            initial={{ opacity: 0, y: 20 }}
+      <HeroSection ref={heroRef}>
+        <HeroMedia style={{ y: heroY, scale: heroScale }}>
+          <img src="https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=1920&q=80" alt="" />
+        </HeroMedia>
+        <HeroContent
+          initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            Контакты
-          </PageTitle>
-          <PageSubtitle
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-          >
-            Свяжитесь с нами любым удобным способом
-          </PageSubtitle>
-        </HeaderContainer>
-      </PageHeader>
-
-      <PageWrapper>
-        <ContentContainer>
-          <SectionTitle>
-            <h2>Свяжитесь с <span>нами</span></h2>
-          </SectionTitle>
-          
-          <ContactGrid>
-            <ContactInfoSection>
-              <ContactCard
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
-              >
-                <ContactIcon>
-                  <MapPin size={26} />
-                </ContactIcon>
-                <ContactDetails>
-                  <h4>Главный офис</h4>
-                  <p>
-                    г. Москва, ул. Арбат, д. 10<br />
-                    Ежедневно: 09:00 — 22:00
-                  </p>
-                </ContactDetails>
-              </ContactCard>
-              
-              <ContactCard
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2 }}
-              >
-                <ContactIcon>
-                  <Phone size={26} />
-                </ContactIcon>
-                <ContactDetails>
-                  <h4>Телефоны</h4>
-                  <p>
-                    <a href="tel:+74951234567">+7 (495) 123-45-67</a><br />
-                    <a href="tel:+74959876543">+7 (495) 987-65-43</a>
-                  </p>
-                </ContactDetails>
-              </ContactCard>
-              
-              <ContactCard
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.3 }}
-              >
-                <ContactIcon>
-                  <Mail size={26} />
-                </ContactIcon>
-                <ContactDetails>
-                  <h4>Email</h4>
-                  <p>
-                    <a href="mailto:info@bellepatisserie.ru">info@bellepatisserie.ru</a><br />
-                    <a href="mailto:order@bellepatisserie.ru">order@bellepatisserie.ru</a>
-                  </p>
-                </ContactDetails>
-              </ContactCard>
-              
-              <ContactCard
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.4 }}
-              >
-                <ContactIcon>
-                  <Clock size={26} />
-                </ContactIcon>
-                <ContactDetails>
-                  <h4>Часы работы</h4>
-                  <p>
-                    Пн-Пт: 08:00 — 22:00<br />
-                    Сб-Вс: 09:00 — 21:00
-                  </p>
-                </ContactDetails>
-              </ContactCard>
-              
-              <SocialSection>
-                <SocialTitle>Мы в соцсетях</SocialTitle>
-                <SocialLinks>
-                  <SocialLink 
-                    href="https://instagram.com" 
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Instagram size={24} />
-                  </SocialLink>
-                  <SocialLink 
-                    href="https://t.me" 
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Send size={24} />
-                  </SocialLink>
-                  <SocialLink 
-                    href="https://wa.me" 
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <MessageCircle size={24} />
-                  </SocialLink>
-                </SocialLinks>
-              </SocialSection>
-            </ContactInfoSection>
-
-            <FormSection
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <HeroTitle>Get in <span>Touch</span></HeroTitle>
+        </HeroContent>
+      </HeroSection>
+      
+      <MainSection>
+        <InfoSection>
+          <InfoInner>
+            <SectionTag
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
             >
-              {!isSubmitted ? (
-                <>
-                  <FormTitle>Напишите <span>нам</span></FormTitle>
-                  <FormSubtitle>Мы ответим в течение 24 часов</FormSubtitle>
-                  
-                  <Form onSubmit={handleSubmit}>
-                    <FormRow>
-                      <FormGroup>
-                        <Label>Ваше имя</Label>
-                        <Input
-                          type="text"
-                          name="name"
-                          placeholder="Как вас зовут?"
-                          value={formData.name}
-                          onChange={handleChange}
-                          required
-                        />
-                      </FormGroup>
-                      <FormGroup>
-                        <Label>Email</Label>
-                        <Input
-                          type="email"
-                          name="email"
-                          placeholder="email@example.com"
-                          value={formData.email}
-                          onChange={handleChange}
-                          required
-                        />
-                      </FormGroup>
-                    </FormRow>
-                    
-                    <FormRow>
-                      <FormGroup>
-                        <Label>Телефон</Label>
-                        <Input
-                          type="tel"
-                          name="phone"
-                          placeholder="+7 (___) ___-__-__"
-                          value={formData.phone}
-                          onChange={handleChange}
-                        />
-                      </FormGroup>
-                      <FormGroup>
-                        <Label>Тема</Label>
-                        <Input
-                          type="text"
-                          name="subject"
-                          placeholder="О чём хотите спросить?"
-                          value={formData.subject}
-                          onChange={handleChange}
-                          required
-                        />
-                      </FormGroup>
-                    </FormRow>
-                    
-                    <FormGroup>
-                      <Label>Сообщение</Label>
-                      <Textarea
-                        name="message"
-                        placeholder="Ваше сообщение..."
-                        value={formData.message}
-                        onChange={handleChange}
-                        required
-                      />
-                    </FormGroup>
-                    
-                    <SubmitButton type="submit">
-                      <Send size={18} />
-                      Отправить сообщение
-                    </SubmitButton>
-                  </Form>
-                </>
-              ) : (
-                <SuccessMessage
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                >
-                  <SuccessIcon
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.2, type: 'spring' }}
-                  >
-                    ✓
-                  </SuccessIcon>
-                  <SuccessTitle>Сообщение отправлено!</SuccessTitle>
-                  <SuccessText>
-                    Спасибо за обращение! Мы свяжемся с вами в ближайшее время.
-                  </SuccessText>
-                </SuccessMessage>
-              )}
-            </FormSection>
-          </ContactGrid>
-        </ContentContainer>
-      </PageWrapper>
+              Contact
+            </SectionTag>
+            <SectionTitle
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+            >
+              Let's Start a <span>Conversation</span>
+            </SectionTitle>
+            <InfoText
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              Have a question or feedback? We'd love to hear from you. 
+              Drop by, give us a call, or send a message.
+            </InfoText>
+            
+            <ContactItems>
+              <ContactItem
+                href="https://maps.google.com/?q=41.311081,69.279737"
+                target="_blank"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <ContactIcon>
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                    <circle cx="12" cy="9" r="2.5"/>
+                  </svg>
+                </ContactIcon>
+                <ContactInfo>
+                  <ContactLabel>Visit Us</ContactLabel>
+                  <ContactValue>36 A Taras Shevchenko, Tashkent</ContactValue>
+                </ContactInfo>
+                <ContactArrow>→</ContactArrow>
+              </ContactItem>
+              
+              <ContactItem
+                href="tel:+998999014433"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+              >
+                <ContactIcon>
+                  <svg viewBox="0 0 24 24">
+                    <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+                  </svg>
+                </ContactIcon>
+                <ContactInfo>
+                  <ContactLabel>Call Us</ContactLabel>
+                  <ContactValue>+998 99 901 44 33</ContactValue>
+                </ContactInfo>
+                <ContactArrow>→</ContactArrow>
+              </ContactItem>
+              
+              <ContactItem
+                href="mailto:info@socialscafe.uz"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+              >
+                <ContactIcon>
+                  <svg viewBox="0 0 24 24">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                    <polyline points="22,6 12,13 2,6"/>
+                  </svg>
+                </ContactIcon>
+                <ContactInfo>
+                  <ContactLabel>Email Us</ContactLabel>
+                  <ContactValue>info@socialscafe.uz</ContactValue>
+                </ContactInfo>
+                <ContactArrow>→</ContactArrow>
+              </ContactItem>
+            </ContactItems>
+            
+            <Divider><span>Follow Us</span></Divider>
+            
+            <SocialLinks>
+              <SocialLink 
+                href="https://instagram.com/socials_uz" 
+                target="_blank"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                title="Instagram"
+              >
+                <svg viewBox="0 0 24 24">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                  <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                </svg>
+              </SocialLink>
+              <SocialLink 
+                href="https://t.me/socialscafe" 
+                target="_blank"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                title="Telegram"
+              >
+                <svg viewBox="0 0 24 24">
+                  <path d="M21.2 4.4L2.4 10.8c-.6.2-.6 1.1.1 1.3l4.9 1.5 1.9 6c.1.4.6.5.9.3l2.8-2.3 5.5 4c.4.3 1 .1 1.1-.4L22.8 5.5c.2-.7-.5-1.3-1.1-1.1zM9.6 13.4l-.3 3.3-.9-4.2 10.6-6.5-9.4 7.4z"/>
+                </svg>
+              </SocialLink>
+              <SocialLink 
+                href="https://facebook.com/socialscafe" 
+                target="_blank"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                title="Facebook"
+              >
+                <svg viewBox="0 0 24 24">
+                  <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
+                </svg>
+              </SocialLink>
+            </SocialLinks>
+          </InfoInner>
+        </InfoSection>
+        
+        <FormSection>
+          <FormInner
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            onSubmit={handleSubmit}
+          >
+            <FormHeader>
+              <FormIcon>
+                <svg viewBox="0 0 24 24">
+                  <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                </svg>
+              </FormIcon>
+              <FormTitle>Send a <span>Message</span></FormTitle>
+              <FormSubtitle>We'll get back to you within 24 hours</FormSubtitle>
+            </FormHeader>
+            
+            {submitted && (
+              <SuccessMessage 
+                initial={{ opacity: 0, scale: 0.9 }} 
+                animate={{ opacity: 1, scale: 1 }}
+              >
+                ✓ Message sent successfully!
+              </SuccessMessage>
+            )}
+            
+            <FormGrid>
+              <FormGroup>
+                <FormLabel>Name</FormLabel>
+                <FormInput 
+                  type="text"
+                  placeholder="Your name"
+                  value={formData.name}
+                  onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
+                  required
+                />
+              </FormGroup>
+              <FormGroup>
+                <FormLabel>Email</FormLabel>
+                <FormInput 
+                  type="email"
+                  placeholder="your@email.com"
+                  value={formData.email}
+                  onChange={e => setFormData(p => ({ ...p, email: e.target.value }))}
+                  required
+                />
+              </FormGroup>
+              <FormGroup>
+                <FormLabel>Message</FormLabel>
+                <FormTextarea 
+                  placeholder="What would you like to tell us?"
+                  value={formData.message}
+                  onChange={e => setFormData(p => ({ ...p, message: e.target.value }))}
+                  required
+                />
+              </FormGroup>
+            </FormGrid>
+            
+            <SubmitButton 
+              type="submit"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Send Message →
+            </SubmitButton>
+          </FormInner>
+        </FormSection>
+      </MainSection>
     </>
   )
 }
+
+export default Contact

@@ -1,1040 +1,588 @@
-import { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import styled from 'styled-components'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Calendar, Clock, Users, User, Phone, Mail, Check, ChevronLeft, ChevronRight } from 'lucide-react'
-import { Input, Textarea } from '../components/ui'
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 
-// Types
-interface ReservationData {
-  date: string
-  time: string
-  guests: number
-  name: string
-  phone: string
-  email: string
-  notes: string
-}
-
-// Page Header
-const PageHeader = styled.section`
-  padding-top: ${({ theme }) => theme.spacing['5xl']};
-  padding-bottom: ${({ theme }) => theme.spacing['3xl']};
-  background: 
-    linear-gradient(rgba(139, 69, 87, 0.85), rgba(167, 107, 91, 0.85)),
-    url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1920') center/cover no-repeat;
+// ============ HERO ============
+const HeroSection = styled(motion.section)`
   position: relative;
+  height: 50vh;
+  min-height: 400px;
+  display: flex;
+  align-items: flex-end;
+  background: ${({ theme }) => theme.colors.dark.main};
+  overflow: hidden;
 `
 
-const HeaderContainer = styled.div`
-  max-width: 1440px;
+const HeroMedia = styled(motion.div)`
+  position: absolute;
+  inset: -100px;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(10, 10, 10, 0.4) 0%, rgba(10, 10, 10, 0.8) 100%);
+  }
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`
+
+const HeroContent = styled(motion.div)`
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1600px;
   margin: 0 auto;
+  padding: ${({ theme }) => `${theme.spacing['4xl']} ${theme.spacing['3xl']}`};
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
   padding: ${({ theme }) => `${theme.spacing['3xl']} ${theme.spacing.xl}`};
-  text-align: center;
+  }
 `
 
-const PageTitle = styled(motion.h1)`
-  font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: ${({ theme }) => theme.fontSizes['5xl']};
-  color: ${({ theme }) => theme.colors.white};
-  margin-bottom: ${({ theme }) => theme.spacing.md};
+const HeroTitle = styled.h1`
+  font-size: clamp(2.5rem, 8vw, ${({ theme }) => theme.fontSizes['6xl']});
+  color: ${({ theme }) => theme.colors.text.white};
+  font-weight: ${({ theme }) => theme.fontWeights.light};
+  
+  span { font-style: italic; color: ${({ theme }) => theme.colors.primary.accent}; }
 `
 
-const PageSubtitle = styled(motion.p)`
+const HeroDescription = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.lg};
-  color: ${({ theme }) => theme.colors.primary.lighter};
-  max-width: 600px;
-  margin: 0 auto;
+  color: ${({ theme }) => theme.colors.text.cream};
+  opacity: 0.7;
+  margin-top: ${({ theme }) => theme.spacing.md};
 `
 
-// Main Content
-const ReservationContent = styled.section`
-  padding: ${({ theme }) => theme.spacing['3xl']} 0 ${({ theme }) => theme.spacing['5xl']};
-  background: ${({ theme }) => theme.colors.background.primary};
+// ============ MAIN ============
+const MainSection = styled.section`
+  background: ${({ theme }) => theme.colors.background.cream};
+  padding: ${({ theme }) => `${theme.spacing['4xl']} ${theme.spacing['3xl']}`};
+  min-height: 60vh;
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    padding: ${({ theme }) => `${theme.spacing['3xl']} ${theme.spacing.xl}`};
+  }
 `
 
-const ReservationContainer = styled.div`
+const MainContainer = styled.div`
   max-width: 800px;
   margin: 0 auto;
-  padding: 0 ${({ theme }) => theme.spacing.xl};
 `
 
-// Progress Steps - Creative Design
-const ProgressBar = styled.div`
+// ============ STEPS ============
+const Steps = styled.div`
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  margin-bottom: 60px;
-  position: relative;
+  gap: ${({ theme }) => theme.spacing['3xl']};
+  margin-bottom: ${({ theme }) => theme.spacing['3xl']};
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    gap: ${({ theme }) => theme.spacing.xl};
+  }
 `
 
-const ProgressStep = styled.div<{ $active: boolean; $completed: boolean }>`
+const Step = styled.div<{ $active: boolean; $done: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm};
   position: relative;
   
-  &:not(:last-child)::after {
+  &::after {
     content: '';
     position: absolute;
-    top: 28px;
-    left: calc(50% + 35px);
-    width: 100px;
-    height: 2px;
-    background: ${({ $completed }) => 
-      $completed 
-        ? 'linear-gradient(90deg, #C9A86C, #C9A86C)' 
-        : 'linear-gradient(90deg, #d4c4bc, #d4c4bc)'};
+    top: 20px;
+    left: calc(50% + 32px);
+    width: 70px;
+    height: 1px;
+    background: ${({ $done, theme }) => $done ? theme.colors.dark.main : theme.colors.divider};
     
-    @media (max-width: 600px) {
-      width: 60px;
-      left: calc(50% + 30px);
+    @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+      width: 40px;
+      left: calc(50% + 25px);
     }
   }
+  
+  &:last-child::after { display: none; }
 `
 
-const StepNumber = styled.div<{ $active: boolean; $completed: boolean }>`
-  width: 56px;
-  height: 56px;
-  background: ${({ $active, $completed }) => 
-    $completed 
-      ? 'linear-gradient(135deg, #C9A86C 0%, #b89a5a 100%)'
-      : $active 
-        ? 'linear-gradient(135deg, #7a4a5a 0%, #5a3545 100%)' 
-        : 'transparent'};
-  color: ${({ $active, $completed }) => 
-    $active || $completed ? '#fff' : '#7a4a5a'};
-  border: ${({ $active, $completed }) => 
-    $active || $completed ? 'none' : '2px solid #d4c4bc'};
+const StepNumber = styled.div<{ $active: boolean; $done: boolean }>`
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: 20px;
-  font-weight: 400;
-  transition: all 0.3s ease;
-  position: relative;
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  font-style: italic;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  transition: all ${({ theme }) => theme.transitions.normal};
   
-  ${({ $active }) => $active && `
-    &::before,
-    &::after {
-      content: '';
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      border: 2px solid #C9A86C;
-    }
-    
-    &::before {
-      top: -5px;
-      left: -5px;
-      border-right: none;
-      border-bottom: none;
-    }
-    
-    &::after {
-      bottom: -5px;
-      right: -5px;
-      border-left: none;
-      border-top: none;
-    }
-  `}
-  
-  svg {
-    stroke-width: 3;
-  }
+  ${({ $active, $done, theme }) => {
+    if ($done) return `background: ${theme.colors.dark.main}; color: ${theme.colors.text.white};`
+    if ($active) return `background: ${theme.colors.dark.main}; color: ${theme.colors.text.white}; box-shadow: 0 0 0 4px ${theme.colors.primary.light};`
+    return `background: ${theme.colors.background.primary}; color: ${theme.colors.text.muted}; border: 1px solid ${theme.colors.divider};`
+  }}
 `
 
 const StepLabel = styled.span<{ $active: boolean }>`
-  margin-top: 16px;
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 13px;
-  letter-spacing: 0.05em;
-  color: ${({ $active }) => $active ? '#4a2c34' : '#a08080'};
-  text-align: center;
-  transition: color 0.3s ease;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: ${({ $active, theme }) => $active ? theme.colors.text.primary : theme.colors.text.muted};
   
-  @media (max-width: 600px) {
-    font-size: 11px;
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    display: none;
   }
 `
 
-const StepWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 140px;
-  
-  @media (max-width: 600px) {
-    width: 100px;
-  }
-`
-
-// Form Card - Creative Design
+// ============ FORM CARD ============
 const FormCard = styled(motion.div)`
-  background: linear-gradient(145deg, #fff 0%, #faf7f5 100%);
-  border-radius: 30px;
-  padding: 50px;
-  box-shadow: 0 20px 60px rgba(122, 74, 90, 0.12);
-  position: relative;
+  background: ${({ theme }) => theme.colors.background.primary};
+  padding: ${({ theme }) => theme.spacing['3xl']};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
   
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 15px;
-    border: 1px solid rgba(201, 168, 108, 0.2);
-    border-radius: 22px;
-    pointer-events: none;
-  }
-  
-  @media (max-width: 600px) {
-    padding: 30px 20px;
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    padding: ${({ theme }) => theme.spacing['2xl']};
   }
 `
 
 const FormTitle = styled.h2`
-  font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: 32px;
-  color: #4a2c34;
-  margin-bottom: 40px;
+  font-size: ${({ theme }) => theme.fontSizes['2xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.light};
   text-align: center;
-  font-weight: 400;
-  position: relative;
-  
-  &::after {
-    content: '✦';
-    display: block;
-    margin-top: 15px;
-    font-size: 12px;
-    color: #C9A86C;
-  }
+  margin-bottom: ${({ theme }) => theme.spacing['2xl']};
 `
 
-// Step 1: Date & Time - Creative Design
-const CalendarGrid = styled.div`
+// ============ LOCATION ============
+const LocationGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-  margin-bottom: 40px;
-  background: linear-gradient(145deg, #f5ebe6 0%, #ede3dc 100%);
-  padding: 20px;
-  border-radius: 20px;
-  border: 1px solid rgba(201, 168, 108, 0.2);
-`
-
-const CalendarHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-`
-
-const CalendarMonth = styled.h3`
-  font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: 24px;
-  color: #4a2c34;
-  font-weight: 400;
-`
-
-const CalendarNavButton = styled.button`
-  width: 44px;
-  height: 44px;
-  background: transparent;
-  border: 2px solid #d4c4bc;
-  color: #7a4a5a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  
-  &:hover:not(:disabled) {
-    background: linear-gradient(135deg, #7a4a5a 0%, #5a3545 100%);
-    border-color: transparent;
-    color: #fff;
-  }
-  
-  &:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-  }
-`
-
-const WeekDayLabel = styled.div`
-  text-align: center;
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 12px;
-  font-weight: 500;
-  color: #7a4a5a;
-  padding: 10px 0;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-`
-
-const DayButton = styled.button<{ $selected: boolean; $disabled: boolean; $today: boolean }>`
-  aspect-ratio: 1;
-  font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: 16px;
-  font-weight: 400;
-  background: ${({ $selected }) => 
-    $selected ? 'linear-gradient(135deg, #7a4a5a 0%, #5a3545 100%)' : 'transparent'};
-  color: ${({ $selected, $disabled, $today }) => 
-    $selected ? '#fff' : 
-    $disabled ? '#c0b0a8' : 
-    $today ? '#C9A86C' : '#4a2c34'};
-  border: ${({ $today, $selected }) => 
-    $today && !$selected ? '2px solid #C9A86C' : 'none'};
-  cursor: ${({ $disabled }) => $disabled ? 'not-allowed' : 'pointer'};
-  opacity: ${({ $disabled }) => $disabled ? 0.5 : 1};
-  transition: all 0.3s ease;
-  position: relative;
-  
-  ${({ $selected }) => $selected && `
-    &::before,
-    &::after {
-      content: '';
-      position: absolute;
-      width: 6px;
-      height: 6px;
-      border: 1px solid #C9A86C;
-    }
-    
-    &::before {
-      top: 2px;
-      left: 2px;
-      border-right: none;
-      border-bottom: none;
-    }
-    
-    &::after {
-      bottom: 2px;
-      right: 2px;
-      border-left: none;
-      border-top: none;
-    }
-  `}
-  
-  &:hover:not(:disabled) {
-    background: ${({ $selected }) => 
-      $selected ? 'linear-gradient(135deg, #7a4a5a 0%, #5a3545 100%)' : 'rgba(122, 74, 90, 0.1)'};
-  }
-`
-
-const TimeSlotsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 40px;
-  
-  @media (max-width: 600px) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-`
-
-const TimeSlot = styled.button<{ $selected: boolean; $disabled: boolean }>`
-  padding: 16px;
-  font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: 16px;
-  font-weight: 400;
-  background: ${({ $selected }) => 
-    $selected 
-      ? 'linear-gradient(135deg, #7a4a5a 0%, #5a3545 100%)' 
-      : 'transparent'};
-  color: ${({ $selected, $disabled }) => 
-    $selected ? '#fff' : 
-    $disabled ? '#c0b0a8' : '#4a2c34'};
-  border: ${({ $selected }) => $selected ? 'none' : '2px solid #d4c4bc'};
-  cursor: ${({ $disabled }) => $disabled ? 'not-allowed' : 'pointer'};
-  opacity: ${({ $disabled }) => $disabled ? 0.5 : 1};
-  transition: all 0.3s ease;
-  position: relative;
-  
-  ${({ $selected }) => $selected && `
-    box-shadow: 0 6px 20px rgba(122, 74, 90, 0.3);
-    
-    &::before,
-    &::after {
-      content: '';
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      border: 2px solid #C9A86C;
-    }
-    
-    &::before {
-      top: -4px;
-      left: -4px;
-      border-right: none;
-      border-bottom: none;
-    }
-    
-    &::after {
-      bottom: -4px;
-      right: -4px;
-      border-left: none;
-      border-top: none;
-    }
-  `}
-  
-  &:hover:not(:disabled) {
-    border-color: ${({ $selected }) => $selected ? 'transparent' : '#7a4a5a'};
-    color: ${({ $selected }) => $selected ? '#fff' : '#7a4a5a'};
-  }
-`
-
-const GuestsSelector = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 30px;
-  margin-bottom: 40px;
-  padding: 30px;
-  background: linear-gradient(145deg, #f5ebe6 0%, #ede3dc 100%);
-  border-radius: 20px;
-  border: 1px solid rgba(201, 168, 108, 0.2);
-`
-
-const GuestButton = styled.button<{ $disabled?: boolean }>`
-  width: 56px;
-  height: 56px;
-  background: ${({ $disabled }) => $disabled ? 'transparent' : 'linear-gradient(135deg, #7a4a5a 0%, #5a3545 100%)'};
-  border: ${({ $disabled }) => $disabled ? '2px solid #d4c4bc' : 'none'};
-  color: ${({ $disabled }) => $disabled ? '#c0b0a8' : '#fff'};
-  font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  cursor: ${({ $disabled }) => $disabled ? 'not-allowed' : 'pointer'};
-  
-  &:hover:not(:disabled) {
-    transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(122, 74, 90, 0.3);
-  }
-`
-
-const GuestCount = styled.div`
-  text-align: center;
-  min-width: 100px;
-  
-  span {
-    display: block;
-    font-family: ${({ theme }) => theme.fonts.heading};
-    font-size: 56px;
-    font-weight: 400;
-    color: #C9A86C;
-    line-height: 1;
-  }
-  
-  small {
-    font-family: ${({ theme }) => theme.fonts.body};
-    font-size: 14px;
-    color: #8b6b6b;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-`
-
-const SectionTitle = styled.h3`
-  font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: 18px;
-  color: #4a2c34;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-weight: 400;
-  
-  &::before {
-    content: '';
-    width: 30px;
-    height: 1px;
-    background: #C9A86C;
-  }
-  
-  svg {
-    color: #C9A86C;
-  }
-`
-
-// Step 2: Details
-const FormGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr 1fr;
   gap: ${({ theme }) => theme.spacing.lg};
-  margin-bottom: ${({ theme }) => theme.spacing.lg};
   
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
     grid-template-columns: 1fr;
   }
 `
 
-// Step 3: Confirmation - Creative Design
-const ConfirmationCard = styled.div`
-  background: linear-gradient(145deg, #f5ebe6 0%, #ede3dc 100%);
-  border-radius: 20px;
-  padding: 30px;
-  margin-bottom: 30px;
-  border: 1px solid rgba(201, 168, 108, 0.2);
-`
-
-const ConfirmationRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 0;
-  border-bottom: 1px solid rgba(201, 168, 108, 0.2);
+const LocationOption = styled.button<{ $selected: boolean }>`
+  padding: ${({ theme }) => theme.spacing.xl};
+  text-align: left;
+  background: ${({ $selected, theme }) => $selected ? theme.colors.dark.main : theme.colors.background.cream};
+  color: ${({ $selected, theme }) => $selected ? theme.colors.text.white : theme.colors.text.primary};
+  border: none;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  cursor: pointer;
+  transition: all ${({ theme }) => theme.transitions.fast};
   
-  &:last-child {
-    border-bottom: none;
+  &:hover {
+    background: ${({ $selected, theme }) => $selected ? theme.colors.dark.main : theme.colors.dark.light};
+    color: ${({ theme }) => theme.colors.text.white};
   }
 `
 
-const ConfirmationLabel = styled.span`
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 14px;
-  color: #8b6b6b;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+const LocationName = styled.h3`
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  font-weight: ${({ theme }) => theme.fontWeights.light};
+  margin-bottom: 4px;
 `
 
-const ConfirmationValue = styled.span`
-  font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: 18px;
-  font-weight: 400;
-  color: #4a2c34;
+const LocationAddress = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  opacity: 0.7;
 `
 
-// Success Screen - Creative Design
-const SuccessWrapper = styled(motion.div)`
-  text-align: center;
-  padding: 40px 20px;
+// ============ DATE/TIME ============
+const DateTimeGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: ${({ theme }) => theme.spacing['2xl']};
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    grid-template-columns: 1fr;
+  }
 `
 
-const SuccessIcon = styled(motion.div)`
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 30px;
-  background: linear-gradient(135deg, #7a4a5a 0%, #5a3545 100%);
+const SectionLabel = styled.h3`
+  font-size: ${({ theme }) => theme.fontSizes.md};
+  font-weight: ${({ theme }) => theme.fontWeights.light};
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
+`
+
+const Calendar = styled.div`
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+`
+
+const CalendarDay = styled.button<{ $selected: boolean; $disabled: boolean; $header?: boolean }>`
+  padding: ${({ theme }) => theme.spacing.sm};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  border: none;
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  cursor: ${({ $disabled, $header }) => $disabled || $header ? 'default' : 'pointer'};
+  transition: all ${({ theme }) => theme.transitions.fast};
+  background: transparent;
+  
+  ${({ $selected, $disabled, $header, theme }) => {
+    if ($header) return `font-weight: ${theme.fontWeights.medium}; color: ${theme.colors.text.muted}; font-size: 10px;`
+    if ($disabled) return `color: ${theme.colors.text.muted}; opacity: 0.4;`
+    if ($selected) return `background: ${theme.colors.dark.main}; color: ${theme.colors.text.white};`
+    return `color: ${theme.colors.text.primary}; &:hover { background: ${theme.colors.background.cream}; }`
+  }}
+`
+
+const TimeSlots = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: ${({ theme }) => theme.spacing.sm};
+`
+
+const TimeSlot = styled.button<{ $selected: boolean }>`
+  padding: ${({ theme }) => theme.spacing.md};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  background: ${({ $selected, theme }) => $selected ? theme.colors.dark.main : 'transparent'};
+  color: ${({ $selected, theme }) => $selected ? theme.colors.text.white : theme.colors.text.primary};
+  border: 1px solid ${({ $selected, theme }) => $selected ? theme.colors.dark.main : theme.colors.divider};
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  cursor: pointer;
+  transition: all ${({ theme }) => theme.transitions.fast};
+  
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.dark.main};
+  }
+`
+
+// ============ GUESTS ============
+const GuestSelector = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  position: relative;
+  gap: ${({ theme }) => theme.spacing['2xl']};
+  padding: ${({ theme }) => theme.spacing['3xl']};
+`
+
+const GuestButton = styled.button`
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${({ theme }) => theme.colors.background.cream};
+  border: none;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  font-size: ${({ theme }) => theme.fontSizes.xl};
+  cursor: pointer;
+  transition: all ${({ theme }) => theme.transitions.fast};
+  color: ${({ theme }) => theme.colors.text.primary};
   
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    width: 15px;
-    height: 15px;
-    border: 3px solid #C9A86C;
-  }
+  &:hover { background: ${({ theme }) => theme.colors.dark.main}; color: ${({ theme }) => theme.colors.text.white}; }
+  &:disabled { opacity: 0.3; cursor: not-allowed; }
+`
+
+const GuestCount = styled.div`
+  font-family: ${({ theme }) => theme.fonts.heading};
+  font-size: ${({ theme }) => theme.fontSizes['5xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.light};
+  min-width: 100px;
+  text-align: center;
+`
+
+// ============ DETAILS ============
+const FormGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: ${({ theme }) => theme.spacing.lg};
   
-  &::before {
-    top: -8px;
-    left: -8px;
-    border-right: none;
-    border-bottom: none;
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    grid-template-columns: 1fr;
   }
+`
+
+const FormGroup = styled.div<{ $full?: boolean }>`
+  grid-column: ${({ $full }) => $full ? 'span 2' : 'span 1'};
   
-  &::after {
-    bottom: -8px;
-    right: -8px;
-    border-left: none;
-    border-top: none;
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    grid-column: span 1;
   }
+`
+
+const FormLabel = styled.label`
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: ${({ theme }) => theme.colors.text.muted};
+  margin-bottom: ${({ theme }) => theme.spacing.sm};
+`
+
+const FormInput = styled.input`
+  width: 100%;
+  padding: ${({ theme }) => theme.spacing.lg};
+  font-size: ${({ theme }) => theme.fontSizes.md};
+  font-family: ${({ theme }) => theme.fonts.body};
+  background: ${({ theme }) => theme.colors.background.cream};
+  border: none;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  outline: none;
+  transition: all ${({ theme }) => theme.transitions.fast};
+  
+  &:focus { box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.dark.main}; }
+`
+
+const FormTextarea = styled.textarea`
+  width: 100%;
+  padding: ${({ theme }) => theme.spacing.lg};
+  font-size: ${({ theme }) => theme.fontSizes.md};
+  font-family: ${({ theme }) => theme.fonts.body};
+  background: ${({ theme }) => theme.colors.background.cream};
+  border: none;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  outline: none;
+  resize: vertical;
+  min-height: 100px;
+  transition: all ${({ theme }) => theme.transitions.fast};
+  
+  &:focus { box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.dark.main}; }
+`
+
+// ============ NAV ============
+const Navigation = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: ${({ theme }) => theme.spacing['2xl']};
+`
+
+const NavButton = styled.button<{ $primary?: boolean }>`
+  padding: ${({ theme }) => `${theme.spacing.md} ${theme.spacing['2xl']}`};
+  font-size: 12px;
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  cursor: pointer;
+  transition: all ${({ theme }) => theme.transitions.normal};
+  
+  ${({ $primary, theme }) => $primary ? `
+    background: ${theme.colors.dark.main};
+    color: ${theme.colors.text.white};
+    border: none;
+    &:hover { transform: scale(1.02); }
+  ` : `
+    background: transparent;
+    color: ${theme.colors.text.secondary};
+    border: 1px solid ${theme.colors.divider};
+    &:hover { border-color: ${theme.colors.text.secondary}; }
+  `}
+  
+  &:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+`
+
+// ============ SUCCESS ============
+const Success = styled(motion.div)`
+  text-align: center;
+  padding: ${({ theme }) => theme.spacing['2xl']};
+`
+
+const SuccessIcon = styled.div`
+  width: 80px;
+  height: 80px;
+  margin: 0 auto ${({ theme }) => theme.spacing.xl};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${({ theme }) => theme.colors.dark.main};
+  color: ${({ theme }) => theme.colors.primary.accent};
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  font-size: 36px;
 `
 
 const SuccessTitle = styled.h2`
-  font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: 36px;
-  color: #4a2c34;
-  margin-bottom: 16px;
-  font-weight: 400;
+  font-size: ${({ theme }) => theme.fontSizes['2xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.light};
+  margin-bottom: ${({ theme }) => theme.spacing.md};
 `
 
-const SuccessMessage = styled.p`
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 16px;
-  color: #6b5055;
-  margin-bottom: 30px;
-  line-height: 1.7;
+const SuccessText = styled.p`
+  color: ${({ theme }) => theme.colors.text.secondary};
+  margin-bottom: ${({ theme }) => theme.spacing.xl};
 `
 
-const BookingNumber = styled.div`
-  background: linear-gradient(145deg, #f5ebe6 0%, #ede3dc 100%);
-  padding: 25px;
-  border-radius: 15px;
-  margin-bottom: 30px;
-  border: 1px solid rgba(201, 168, 108, 0.3);
+// ============ COMPONENT ============
+const Reservation: React.FC = () => {
+  const [step, setStep] = useState(1)
+  const [location, setLocation] = useState('')
+  const [selectedDate, setSelectedDate] = useState<number | null>(null)
+  const [selectedTime, setSelectedTime] = useState('')
+  const [guests, setGuests] = useState(2)
+  const [contactInfo, setContactInfo] = useState({ name: '', phone: '', email: '', notes: '' })
+  const [completed, setCompleted] = useState(false)
   
-  span {
-    display: block;
-    font-family: ${({ theme }) => theme.fonts.body};
-    font-size: 12px;
-    color: #8b6b6b;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    margin-bottom: 10px;
-  }
+  const locations = [
+    { id: 'shevchenko', name: 'Socials Shevchenko', address: '36 A Taras Shevchenko street' },
+    { id: 'mirzo', name: 'Socials Mirzo Ulugbek', address: '15 Mirzo Ulugbek street' },
+  ]
   
-  strong {
-    font-family: ${({ theme }) => theme.fonts.heading};
-    font-size: 28px;
-    color: #C9A86C;
-    font-weight: 400;
-  }
-`
-
-// Navigation Buttons - Creative Design
-const FormActions = styled.div`
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  margin-top: 40px;
-`
-
-const ActionButton = styled.button<{ $variant?: 'primary' | 'secondary' }>`
-  padding: 16px 36px;
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 14px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  const times = ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00']
   
-  ${({ $variant }) => $variant === 'primary' ? `
-    background: linear-gradient(135deg, #7a4a5a 0%, #5a3545 100%);
-    border: none;
-    color: #fff;
-    box-shadow: 0 6px 20px rgba(122, 74, 90, 0.3);
-    
-    &:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(122, 74, 90, 0.4);
-    }
-    
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  ` : `
-    background: transparent;
-    border: 2px solid #d4c4bc;
-    color: #7a4a5a;
-    
-    &:hover {
-      border-color: #7a4a5a;
-      background: rgba(122, 74, 90, 0.05);
-    }
-  `}
-`
-
-const steps = [
-  { id: 1, label: 'Дата и время' },
-  { id: 2, label: 'Детали' },
-  { id: 3, label: 'Подтверждение' },
-]
-
-const timeSlots = [
-  '12:00', '12:30', '13:00', '13:30',
-  '14:00', '14:30', '15:00', '15:30',
-  '18:00', '18:30', '19:00', '19:30',
-  '20:00', '20:30', '21:00', '21:30',
-]
-
-const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
-
-const monthNames = [
-  'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-  'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
-]
-
-export const Reservation: React.FC = () => {
-  const [currentStep, setCurrentStep] = useState(1)
-  const [isComplete, setIsComplete] = useState(false)
-  const [currentMonth, setCurrentMonth] = useState(new Date())
-  const [reservationData, setReservationData] = useState<ReservationData>({
-    date: '',
-    time: '',
-    guests: 2,
-    name: '',
-    phone: '',
-    email: '',
-    notes: '',
+  // Parallax
+  const heroRef = useRef<HTMLElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
   })
-
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-
-  const getDaysInMonth = (date: Date) => {
-    const year = date.getFullYear()
-    const month = date.getMonth()
-    const firstDay = new Date(year, month, 1)
-    const lastDay = new Date(year, month + 1, 0)
-    const daysInMonth = lastDay.getDate()
-    
-    // Get the day of week for the first day (0 = Sunday, adjust for Monday start)
-    let startDay = firstDay.getDay() - 1
-    if (startDay < 0) startDay = 6
-    
-    const days: (number | null)[] = []
-    
-    // Add empty cells for days before the first day
-    for (let i = 0; i < startDay; i++) {
-      days.push(null)
-    }
-    
-    // Add the actual days
-    for (let i = 1; i <= daysInMonth; i++) {
-      days.push(i)
-    }
-    
-    return days
-  }
-
-  const isDateDisabled = (day: number) => {
-    const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day)
-    return date < today
-  }
-
-  const isToday = (day: number) => {
-    const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day)
-    return date.toDateString() === today.toDateString()
-  }
-
-  const formatSelectedDate = () => {
-    if (!reservationData.date) return ''
-    const date = new Date(reservationData.date)
-    return date.toLocaleDateString('ru-RU', { 
-      weekday: 'long', 
-      day: 'numeric', 
-      month: 'long' 
-    })
-  }
-
-  const handleDateSelect = (day: number) => {
-    const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day)
-    setReservationData(prev => ({
-      ...prev,
-      date: date.toISOString().split('T')[0]
-    }))
-  }
-
-  const handleNextStep = () => {
-    if (currentStep < 3) {
-      setCurrentStep(prev => prev + 1)
-    } else {
-      setIsComplete(true)
-    }
-  }
-
-  const handlePrevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(prev => prev - 1)
-    }
-  }
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, 150])
+  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 1.1])
+  
+  const handleNext = () => step < 4 ? setStep(step + 1) : setCompleted(true)
+  const handleBack = () => step > 1 && setStep(step - 1)
 
   const canProceed = () => {
-    switch (currentStep) {
-      case 1:
-        return reservationData.date && reservationData.time && reservationData.guests > 0
-      case 2:
-        return reservationData.name && reservationData.phone && reservationData.email
-      default:
-        return true
+    switch (step) {
+      case 1: return location !== ''
+      case 2: return selectedDate !== null && selectedTime !== ''
+      case 3: return guests > 0
+      case 4: return contactInfo.name !== '' && contactInfo.phone !== ''
+      default: return false
     }
   }
-
-  const generateBookingNumber = () => {
-    return `BP-${Date.now().toString(36).toUpperCase()}`
+  
+  const today = new Date()
+  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate()
+  const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).getDay()
+  
+  const days = []
+  for (let i = 0; i < firstDay; i++) days.push(<CalendarDay key={`e-${i}`} $selected={false} $disabled={true}>{''}</CalendarDay>)
+  for (let i = 1; i <= daysInMonth; i++) {
+    const isPast = i < today.getDate()
+    days.push(<CalendarDay key={i} $selected={selectedDate === i} $disabled={isPast} onClick={() => !isPast && setSelectedDate(i)}>{i}</CalendarDay>)
+  }
+  
+  if (completed) {
+    return (
+      <>
+        <HeroSection ref={heroRef}>
+          <HeroMedia style={{ y: heroY, scale: heroScale }}><img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1920&q=80" alt="" /></HeroMedia>
+          <HeroContent initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }}>
+            <HeroTitle>Reservation <span>Confirmed</span></HeroTitle>
+          </HeroContent>
+        </HeroSection>
+        <MainSection>
+          <MainContainer>
+            <FormCard initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+              <Success>
+                <SuccessIcon>✓</SuccessIcon>
+                <SuccessTitle>See You Soon!</SuccessTitle>
+                <SuccessText>Your reservation has been confirmed. We look forward to hosting you.</SuccessText>
+              </Success>
+            </FormCard>
+          </MainContainer>
+        </MainSection>
+      </>
+    )
   }
 
   return (
     <>
-      <PageHeader>
-        <HeaderContainer>
-          <PageTitle
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            Бронирование Столика
-          </PageTitle>
-          <PageSubtitle
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-          >
-            Забронируйте столик за 3 простых шага
-          </PageSubtitle>
-        </HeaderContainer>
-      </PageHeader>
-
-      <ReservationContent>
-        <ReservationContainer>
-          {!isComplete ? (
-            <>
-              <ProgressBar>
-                {steps.map((step) => (
-                  <ProgressStep 
-                    key={step.id}
-                    $active={currentStep === step.id}
-                    $completed={currentStep > step.id}
-                  >
-                    <StepWrapper>
-                      <StepNumber 
-                        $active={currentStep === step.id}
-                        $completed={currentStep > step.id}
-                      >
-                        {currentStep > step.id ? <Check size={20} /> : step.id}
+      <HeroSection ref={heroRef}>
+        <HeroMedia style={{ y: heroY, scale: heroScale }}><img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1920&q=80" alt="" /></HeroMedia>
+        <HeroContent initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }}>
+          <HeroTitle>Reserve a <span>Table</span></HeroTitle>
+          <HeroDescription>Book your spot for an unforgettable experience</HeroDescription>
+        </HeroContent>
+      </HeroSection>
+      
+      <MainSection>
+        <MainContainer>
+          <Steps>
+            {['Location', 'Date', 'Guests', 'Details'].map((label, i) => (
+              <Step key={label} $active={step === i + 1} $done={step > i + 1}>
+                <StepNumber $active={step === i + 1} $done={step > i + 1}>
+                  {step > i + 1 ? '✓' : i + 1}
                       </StepNumber>
-                      <StepLabel $active={currentStep === step.id}>
-                        {step.label}
-                      </StepLabel>
-                    </StepWrapper>
-                  </ProgressStep>
-                ))}
-              </ProgressBar>
+                <StepLabel $active={step === i + 1}>{label}</StepLabel>
+              </Step>
+            ))}
+          </Steps>
 
               <AnimatePresence mode="wait">
-                <FormCard
-                  key={currentStep}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {currentStep === 1 && (
-                    <>
-                      <FormTitle>Выберите дату и время</FormTitle>
-                      
-                      <SectionTitle>
-                        <Calendar size={20} />
-                        Дата
-                      </SectionTitle>
-                      
-                      <CalendarHeader>
-                        <CalendarNavButton
-                          onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}
-                          disabled={currentMonth.getMonth() === today.getMonth() && currentMonth.getFullYear() === today.getFullYear()}
-                        >
-                          <ChevronLeft size={20} />
-                        </CalendarNavButton>
-                        <CalendarMonth>
-                          {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
-                        </CalendarMonth>
-                        <CalendarNavButton
-                          onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}
-                        >
-                          <ChevronRight size={20} />
-                        </CalendarNavButton>
-                      </CalendarHeader>
-                      
-                      <CalendarGrid>
-                        {weekDays.map(day => (
-                          <WeekDayLabel key={day}>{day}</WeekDayLabel>
-                        ))}
-                        {getDaysInMonth(currentMonth).map((day, index) => (
-                          <div key={index}>
-                            {day && (
-                              <DayButton
-                                $selected={reservationData.date === new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day).toISOString().split('T')[0]}
-                                $disabled={isDateDisabled(day)}
-                                $today={isToday(day)}
-                                onClick={() => !isDateDisabled(day) && handleDateSelect(day)}
-                                disabled={isDateDisabled(day)}
-                              >
-                                {day}
-                              </DayButton>
-                            )}
+            <FormCard key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
+              {step === 1 && (
+                <>
+                  <FormTitle>Choose Location</FormTitle>
+                  <LocationGrid>
+                    {locations.map(loc => (
+                      <LocationOption key={loc.id} $selected={location === loc.id} onClick={() => setLocation(loc.id)}>
+                        <LocationName>{loc.name}</LocationName>
+                        <LocationAddress>{loc.address}</LocationAddress>
+                      </LocationOption>
+                    ))}
+                  </LocationGrid>
+                </>
+              )}
+              
+              {step === 2 && (
+                <>
+                  <FormTitle>Select Date & Time</FormTitle>
+                  <DateTimeGrid>
+                    <div>
+                      <SectionLabel>Date</SectionLabel>
+                      <Calendar>
+                        {['S','M','T','W','T','F','S'].map((d,i) => <CalendarDay key={`h-${i}`} $selected={false} $disabled={false} $header>{d}</CalendarDay>)}
+                        {days}
+                      </Calendar>
+                    </div>
+                    <div>
+                      <SectionLabel>Time</SectionLabel>
+                      <TimeSlots>
+                        {times.map(t => <TimeSlot key={t} $selected={selectedTime === t} onClick={() => setSelectedTime(t)}>{t}</TimeSlot>)}
+                      </TimeSlots>
                           </div>
-                        ))}
-                      </CalendarGrid>
-
-                      <SectionTitle>
-                        <Clock size={20} />
-                        Время
-                      </SectionTitle>
-                      
-                      <TimeSlotsGrid>
-                        {timeSlots.map(time => (
-                          <TimeSlot
-                            key={time}
-                            $selected={reservationData.time === time}
-                            $disabled={false}
-                            onClick={() => setReservationData(prev => ({ ...prev, time }))}
-                          >
-                            {time}
-                          </TimeSlot>
-                        ))}
-                      </TimeSlotsGrid>
-
-                      <SectionTitle>
-                        <Users size={20} />
-                        Количество гостей
-                      </SectionTitle>
-                      
-                      <GuestsSelector>
-                        <GuestButton
-                          onClick={() => setReservationData(prev => ({ ...prev, guests: Math.max(1, prev.guests - 1) }))}
-                          $disabled={reservationData.guests <= 1}
-                          disabled={reservationData.guests <= 1}
-                        >
-                          −
-                        </GuestButton>
-                        <GuestCount>
-                          <span>{reservationData.guests}</span>
-                          <small>{reservationData.guests === 1 ? 'гость' : reservationData.guests < 5 ? 'гостя' : 'гостей'}</small>
-                        </GuestCount>
-                        <GuestButton
-                          onClick={() => setReservationData(prev => ({ ...prev, guests: Math.min(8, prev.guests + 1) }))}
-                          $disabled={reservationData.guests >= 8}
-                          disabled={reservationData.guests >= 8}
-                        >
-                          +
-                        </GuestButton>
-                      </GuestsSelector>
+                  </DateTimeGrid>
                     </>
                   )}
 
-                  {currentStep === 2 && (
-                    <>
-                      <FormTitle>Введите ваши данные</FormTitle>
-                      
-                      <FormGrid>
-                        <Input
-                          label="Имя"
-                          placeholder="Ваше имя"
-                          value={reservationData.name}
-                          onChange={(e) => setReservationData(prev => ({ ...prev, name: e.target.value }))}
-                          icon={<User size={20} />}
-                        />
-                        <Input
-                          label="Телефон"
-                          placeholder="+7 (___) ___-__-__"
-                          value={reservationData.phone}
-                          onChange={(e) => setReservationData(prev => ({ ...prev, phone: e.target.value }))}
-                          icon={<Phone size={20} />}
-                        />
-                      </FormGrid>
-                      
-                      <div style={{ marginBottom: '1.5rem' }}>
-                        <Input
-                          label="Email"
-                          type="email"
-                          placeholder="email@example.com"
-                          value={reservationData.email}
-                          onChange={(e) => setReservationData(prev => ({ ...prev, email: e.target.value }))}
-                          icon={<Mail size={20} />}
-                        />
-                      </div>
-                      
-                      <Textarea
-                        label="Особые пожелания"
-                        placeholder="Столик у окна, детский стульчик, аллергии..."
-                        value={reservationData.notes}
-                        onChange={(e) => setReservationData(prev => ({ ...prev, notes: e.target.value }))}
-                      />
+              {step === 3 && (
+                <>
+                  <FormTitle>Number of Guests</FormTitle>
+                  <GuestSelector>
+                    <GuestButton onClick={() => setGuests(Math.max(1, guests - 1))} disabled={guests <= 1}>−</GuestButton>
+                    <GuestCount>{guests}</GuestCount>
+                    <GuestButton onClick={() => setGuests(Math.min(20, guests + 1))} disabled={guests >= 20}>+</GuestButton>
+                  </GuestSelector>
                     </>
                   )}
 
-                  {currentStep === 3 && (
-                    <>
-                      <FormTitle>Подтверждение брони</FormTitle>
-                      
-                      <ConfirmationCard>
-                        <ConfirmationRow>
-                          <ConfirmationLabel>Дата</ConfirmationLabel>
-                          <ConfirmationValue>{formatSelectedDate()}</ConfirmationValue>
-                        </ConfirmationRow>
-                        <ConfirmationRow>
-                          <ConfirmationLabel>Время</ConfirmationLabel>
-                          <ConfirmationValue>{reservationData.time}</ConfirmationValue>
-                        </ConfirmationRow>
-                        <ConfirmationRow>
-                          <ConfirmationLabel>Гостей</ConfirmationLabel>
-                          <ConfirmationValue>{reservationData.guests}</ConfirmationValue>
-                        </ConfirmationRow>
-                        <ConfirmationRow>
-                          <ConfirmationLabel>Имя</ConfirmationLabel>
-                          <ConfirmationValue>{reservationData.name}</ConfirmationValue>
-                        </ConfirmationRow>
-                        <ConfirmationRow>
-                          <ConfirmationLabel>Телефон</ConfirmationLabel>
-                          <ConfirmationValue>{reservationData.phone}</ConfirmationValue>
-                        </ConfirmationRow>
-                        <ConfirmationRow>
-                          <ConfirmationLabel>Email</ConfirmationLabel>
-                          <ConfirmationValue>{reservationData.email}</ConfirmationValue>
-                        </ConfirmationRow>
-                        {reservationData.notes && (
-                          <ConfirmationRow>
-                            <ConfirmationLabel>Пожелания</ConfirmationLabel>
-                            <ConfirmationValue>{reservationData.notes}</ConfirmationValue>
-                          </ConfirmationRow>
-                        )}
-                      </ConfirmationCard>
+              {step === 4 && (
+                <>
+                  <FormTitle>Your Details</FormTitle>
+                  <FormGrid>
+                    <FormGroup><FormLabel>Name *</FormLabel><FormInput placeholder="Your name" value={contactInfo.name} onChange={e => setContactInfo(p => ({ ...p, name: e.target.value }))} /></FormGroup>
+                    <FormGroup><FormLabel>Phone *</FormLabel><FormInput placeholder="+998" value={contactInfo.phone} onChange={e => setContactInfo(p => ({ ...p, phone: e.target.value }))} /></FormGroup>
+                    <FormGroup $full><FormLabel>Email</FormLabel><FormInput placeholder="your@email.com" value={contactInfo.email} onChange={e => setContactInfo(p => ({ ...p, email: e.target.value }))} /></FormGroup>
+                    <FormGroup $full><FormLabel>Notes</FormLabel><FormTextarea placeholder="Any special requests..." value={contactInfo.notes} onChange={e => setContactInfo(p => ({ ...p, notes: e.target.value }))} /></FormGroup>
+                  </FormGrid>
                     </>
                   )}
 
-                  <FormActions>
-                    {currentStep > 1 ? (
-                      <ActionButton $variant="secondary" onClick={handlePrevStep}>
-                        <ChevronLeft size={18} />
-                        Назад
-                      </ActionButton>
-                    ) : (
-                      <div />
-                    )}
-                    <ActionButton 
-                      $variant="primary" 
-                      onClick={handleNextStep}
-                      disabled={!canProceed()}
-                    >
-                      {currentStep === 3 ? 'Подтвердить бронь' : 'Далее'}
-                      {currentStep < 3 && <ChevronRight size={18} />}
-                    </ActionButton>
-                  </FormActions>
-                </FormCard>
-              </AnimatePresence>
-            </>
-          ) : (
-            <FormCard>
-              <SuccessWrapper
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-              >
-                <SuccessIcon
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                >
-                  <Check size={50} />
-                </SuccessIcon>
-                <SuccessTitle>Бронь подтверждена!</SuccessTitle>
-                <SuccessMessage>
-                  Мы отправили детали бронирования на ваш email. 
-                  Ждём вас {formatSelectedDate()} в {reservationData.time}!
-                </SuccessMessage>
-                <BookingNumber>
-                  <span>Номер бронирования</span>
-                  <strong>{generateBookingNumber()}</strong>
-                </BookingNumber>
-                <ActionButton as="a" href="/" $variant="primary" style={{ justifyContent: 'center', textDecoration: 'none' }}>
-                  Вернуться на главную
-                </ActionButton>
-              </SuccessWrapper>
+              <Navigation>
+                <NavButton onClick={handleBack} disabled={step === 1}>Back</NavButton>
+                <NavButton $primary onClick={handleNext} disabled={!canProceed()}>
+                  {step === 4 ? 'Confirm' : 'Continue'}
+                </NavButton>
+              </Navigation>
             </FormCard>
-          )}
-        </ReservationContainer>
-      </ReservationContent>
+          </AnimatePresence>
+        </MainContainer>
+      </MainSection>
     </>
   )
 }
 
+export default Reservation

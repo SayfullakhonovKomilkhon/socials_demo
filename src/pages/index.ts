@@ -1,6 +1,7 @@
-export { Home } from './Home'
-export { Menu } from './Menu'
-export { Reservation } from './Reservation'
-export { Locations } from './Locations'
-export { Contact } from './Contact'
+import Home from './Home'
+import Menu from './Menu'
+import Reservation from './Reservation'
+import Locations from './Locations'
+import Contact from './Contact'
 
+export { Home, Menu, Reservation, Locations, Contact }

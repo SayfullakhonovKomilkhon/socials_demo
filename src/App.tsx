@@ -15,14 +15,38 @@ const ScrollToTop: React.FC = () => {
   return null
 }
 
+// Page transition variants - cinematic effect
+const pageVariants = {
+  initial: { 
+    opacity: 0,
+    y: 40,
+  },
+  enter: { 
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.8,
+      ease: [0.16, 1, 0.3, 1],
+    }
+  },
+  exit: { 
+    opacity: 0,
+    y: -20,
+    transition: {
+      duration: 0.4,
+      ease: [0.4, 0, 1, 1]
+    }
+  }
+}
+
 // Page transition wrapper
 const PageTransition: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.3 }}
+      variants={pageVariants}
+      initial="initial"
+      animate="enter"
+      exit="exit"
     >
       {children}
     </motion.div>
@@ -84,4 +108,3 @@ function App() {
 }
 
 export default App
-

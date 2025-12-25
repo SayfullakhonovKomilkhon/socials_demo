@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X } from 'lucide-react'
 
 const HeaderWrapper = styled(motion.header)<{ $scrolled: boolean }>`
   position: fixed;
@@ -10,203 +9,227 @@ const HeaderWrapper = styled(motion.header)<{ $scrolled: boolean }>`
   left: 0;
   right: 0;
   z-index: ${({ theme }) => theme.zIndex.sticky};
-  background: ${({ $scrolled }) => $scrolled ? '#7a4a5a' : 'transparent'};
-  border-top: ${({ $scrolled }) => $scrolled ? '4px solid #5a3545' : 'none'};
-  transition: all 0.3s ease;
-  padding: ${({ theme }) => theme.spacing.md} 0;
+  padding: ${({ $scrolled }) => $scrolled ? '16px 0' : '28px 0'};
+  background: ${({ $scrolled }) => $scrolled ? 'rgba(10, 10, 10, 0.95)' : 'transparent'};
+  backdrop-filter: ${({ $scrolled }) => $scrolled ? 'blur(20px)' : 'none'};
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 `
 
 const HeaderContainer = styled.div`
-  max-width: 1440px;
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 0 ${({ theme }) => theme.spacing.xl};
+  padding: 0 ${({ theme }) => theme.spacing['3xl']};
   display: flex;
   align-items: center;
   justify-content: space-between;
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    padding: 0 ${({ theme }) => theme.spacing.xl};
+  }
 `
 
 const Logo = styled(Link)`
   font-family: ${({ theme }) => theme.fonts.heading};
   font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  font-style: italic;
-  color: ${({ theme }) => theme.colors.accent.gold};
-  text-decoration: none;
+  font-weight: ${({ theme }) => theme.fontWeights.light};
+  color: ${({ theme }) => theme.colors.text.white};
+  letter-spacing: 0.02em;
   
   span {
-    color: #fff;
+    font-style: italic;
   }
 `
 
-const NavPill = styled.nav<{ $scrolled: boolean }>`
+const Nav = styled.nav`
   display: flex;
   align-items: center;
-  background: ${({ $scrolled }) => $scrolled ? '#9a6a7a' : 'rgba(120, 100, 100, 0.4)'};
-  border-radius: 50px;
-  padding: 6px 8px;
-  border: 1px solid rgba(100, 80, 80, 0.3);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
+  gap: ${({ theme }) => theme.spacing['2xl']};
   
   @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
     display: none;
   }
 `
 
-const NavLink = styled(Link)<{ $active?: boolean }>`
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ $active }) => $active ? '#2d1f1f' : '#f5e8e8'};
-  text-decoration: none;
-  padding: 8px 24px;
-  border-radius: 50px;
+const NavLink = styled(Link)<{ $active: boolean }>`
+  font-size: 13px;
+  font-weight: ${({ theme }) => theme.fontWeights.normal};
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: ${({ $active, theme }) => $active ? theme.colors.primary.accent : theme.colors.text.cream};
+  opacity: ${({ $active }) => $active ? 1 : 0.7};
   transition: all ${({ theme }) => theme.transitions.fast};
-  background: ${({ $active }) => $active ? '#e8d5d5' : 'transparent'};
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: ${({ $active }) => $active ? '100%' : '0'};
+    height: 1px;
+    background: ${({ theme }) => theme.colors.primary.accent};
+    transition: width ${({ theme }) => theme.transitions.normal};
+  }
   
   &:hover {
-    background: #e8d5d5;
-    color: #2d1f1f;
+    opacity: 1;
+    &::after { width: 100%; }
+  }
+`
+
+const ReserveButton = styled(Link)`
+  padding: ${({ theme }) => `${theme.spacing.sm} ${theme.spacing.xl}`};
+  font-size: 12px;
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: ${({ theme }) => theme.colors.dark.main};
+  background: ${({ theme }) => theme.colors.primary.main};
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  transition: all ${({ theme }) => theme.transitions.normal};
+  
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: ${({ theme }) => theme.shadows.glow};
+  }
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    display: none;
   }
 `
 
 const MobileMenuButton = styled.button`
   display: none;
-  width: 44px;
-  height: 44px;
-  color: #f5e8e8;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: ${({ theme }) => theme.spacing.sm};
   
   @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    gap: 6px;
   }
+`
+
+const MenuLine = styled.span`
+  width: 28px;
+  height: 1px;
+  background: ${({ theme }) => theme.colors.text.cream};
 `
 
 const MobileMenu = styled(motion.div)`
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: #7a4a5a;
-  z-index: ${({ theme }) => theme.zIndex.modal};
+  inset: 0;
+  background: ${({ theme }) => theme.colors.dark.main};
+  z-index: ${({ theme }) => theme.zIndex.overlay};
   display: flex;
   flex-direction: column;
-  padding: ${({ theme }) => theme.spacing['3xl']};
-`
-
-const MobileMenuHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: ${({ theme }) => theme.spacing['3xl']};
-`
-
-const MobileNav = styled.nav`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.lg};
+  justify-content: center;
+  gap: ${({ theme }) => theme.spacing['2xl']};
 `
 
 const MobileNavLink = styled(Link)`
   font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: ${({ theme }) => theme.fontSizes['3xl']};
-  color: ${({ theme }) => theme.colors.white};
-  text-decoration: none;
+  font-size: ${({ theme }) => theme.fontSizes['4xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.light};
+  color: ${({ theme }) => theme.colors.text.white};
+  
+  span { font-style: italic; }
   
   &:hover {
-    color: ${({ theme }) => theme.colors.accent.gold};
+    color: ${({ theme }) => theme.colors.primary.accent};
   }
 `
 
-const navItems = [
-  { path: '/', label: 'Главная' },
-  { path: '/menu', label: 'Меню' },
-  { path: '/reservation', label: 'Бронирование' },
-  { path: '/locations', label: 'Филиалы' },
-  { path: '/contact', label: 'Контакты' },
-]
+const MobileCloseButton = styled.button`
+  position: absolute;
+  top: ${({ theme }) => theme.spacing['2xl']};
+  right: ${({ theme }) => theme.spacing['2xl']};
+  background: none;
+  border: none;
+  color: ${({ theme }) => theme.colors.text.cream};
+  font-size: 28px;
+  cursor: pointer;
+  font-weight: ${({ theme }) => theme.fontWeights.light};
+`
 
 export const Header: React.FC = () => {
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const location = useLocation()
-
+  
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50)
-    }
-    
+    const handleScroll = () => setScrolled(window.scrollY > 80)
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
-
+  
   useEffect(() => {
-    setMobileMenuOpen(false)
-  }, [location])
-
+    document.body.style.overflow = mobileMenuOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [mobileMenuOpen])
+  
+  const navLinks = [
+    { path: '/', label: 'Home' },
+    { path: '/menu', label: 'Menu' },
+    { path: '/locations', label: 'Locations' },
+    { path: '/contact', label: 'Contact' },
+  ]
+  
   return (
     <>
-      <HeaderWrapper $scrolled={scrolled}>
+      <HeaderWrapper
+        $scrolled={scrolled}
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+      >
         <HeaderContainer>
-          <Logo to="/">
-            Socials
-          </Logo>
+          <Logo to="/">Socials <span>Cafe</span></Logo>
           
-          <NavPill $scrolled={scrolled}>
-            {navItems.map((item) => (
-              <NavLink 
-                key={item.path} 
-                to={item.path}
-                $active={location.pathname === item.path}
-              >
-                {item.label}
+          <Nav>
+            {navLinks.map(link => (
+              <NavLink key={link.path} to={link.path} $active={location.pathname === link.path}>
+                {link.label}
               </NavLink>
             ))}
-          </NavPill>
+          </Nav>
+          
+          <ReserveButton to="/reservation">Reserve</ReserveButton>
           
           <MobileMenuButton onClick={() => setMobileMenuOpen(true)}>
-            <Menu size={28} />
+            <MenuLine />
+            <MenuLine />
           </MobileMenuButton>
         </HeaderContainer>
       </HeaderWrapper>
-
+      
       <AnimatePresence>
         {mobileMenuOpen && (
           <MobileMenu
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'tween', duration: 0.3 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
           >
-            <MobileMenuHeader>
-              <Logo to="/">
-                Socials
-              </Logo>
-              <MobileMenuButton onClick={() => setMobileMenuOpen(false)}>
-                <X size={28} />
-              </MobileMenuButton>
-            </MobileMenuHeader>
-            
-            <MobileNav>
-              {navItems.map((item, index) => (
-                <motion.div
-                  key={item.path}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <MobileNavLink to={item.path}>
-                    {item.label}
-                  </MobileNavLink>
-                </motion.div>
-              ))}
-            </MobileNav>
+            <MobileCloseButton onClick={() => setMobileMenuOpen(false)}>✕</MobileCloseButton>
+            {navLinks.map((link, i) => (
+              <motion.div
+                key={link.path}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1, duration: 0.5 }}
+              >
+                <MobileNavLink to={link.path} onClick={() => setMobileMenuOpen(false)}>
+                  {link.label === 'Home' ? <span>Home</span> : link.label}
+                </MobileNavLink>
+              </motion.div>
+            ))}
           </MobileMenu>
         )}
       </AnimatePresence>
     </>
   )
 }
-

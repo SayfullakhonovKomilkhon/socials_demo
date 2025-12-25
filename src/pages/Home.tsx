@@ -1,581 +1,366 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import styled from 'styled-components'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Sparkles, ChefHat, Heart, Gift, Star, ChevronLeft, ChevronRight } from 'lucide-react'
-import { LinkButton } from '../components/ui'
+import React, { useRef } from 'react'
+import styled, { keyframes } from 'styled-components'
+import { motion, useInView, useScroll, useTransform } from 'framer-motion'
+import { Link } from 'react-router-dom'
 
-// Hero Section
-const HeroSection = styled.section`
-  min-height: 100vh;
-  background: ${({ theme }) => theme.colors.background.gradient};
+// ============ KEYFRAMES ============
+const shimmer = keyframes`
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+`
+
+// ============ HERO SECTION ============
+const HeroSection = styled(motion.section)`
+  position: relative;
+  height: 100vh;
+  min-height: 700px;
   display: flex;
   align-items: center;
-  position: relative;
+  justify-content: center;
+  background: ${({ theme }) => theme.colors.dark.main};
   overflow: hidden;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('https://images.unsplash.com/photo-1486427944299-d1955d23e34d?w=1920') center/cover;
-    opacity: 0.15;
-  }
-  
-  @media (max-width: 768px) {
-    min-height: auto;
-    padding: 120px 0 60px;
-  }
 `
 
-const HeroContainer = styled.div`
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: ${({ theme }) => `${theme.spacing['5xl']} ${theme.spacing.xl}`};
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: ${({ theme }) => theme.spacing['4xl']};
-  align-items: center;
-  position: relative;
-  z-index: 1;
-  
-  @media (max-width: ${({ theme }) => theme.breakpoints.desktop}) {
-    grid-template-columns: 1fr;
-    text-align: center;
-  }
-  
-  @media (max-width: 768px) {
-    padding: 20px 15px;
-    gap: 20px;
-    display: flex;
-    flex-direction: column;
-  }
-`
-
-const HeroContent = styled(motion.div)`
-  @media (max-width: ${({ theme }) => theme.breakpoints.desktop}) {
-    order: 2;
-    text-align: center;
-  }
-  
-  @media (max-width: 768px) {
-    padding: 0 15px;
-    order: 1;
-  }
-`
-
-const HeroTitle = styled(motion.h1)`
-  font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: ${({ theme }) => theme.fontSizes['7xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.white};
-  line-height: 1;
-  margin-bottom: ${({ theme }) => theme.spacing.xl};
-  
-  span {
-    color: ${({ theme }) => theme.colors.accent.gold};
-    font-style: italic;
-  }
-  
-  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
-    font-size: ${({ theme }) => theme.fontSizes['5xl']};
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 32px;
-    text-align: center;
-    margin-bottom: 20px;
-  }
-`
-
-const HeroSlogan = styled(motion.p)`
-  font-size: ${({ theme }) => theme.fontSizes.xl};
-  color: ${({ theme }) => theme.colors.primary.lighter};
-  margin-bottom: ${({ theme }) => theme.spacing['2xl']};
-  max-width: 500px;
-  line-height: ${({ theme }) => theme.lineHeights.relaxed};
-  
-  @media (max-width: ${({ theme }) => theme.breakpoints.desktop}) {
-    margin: 0 auto ${({ theme }) => theme.spacing['2xl']};
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 14px;
-    padding: 0;
-    max-width: 100%;
-    margin-bottom: 25px;
-    text-align: center;
-  }
-`
-
-const HeroButtons = styled(motion.div)`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing.lg};
-  
-  @media (max-width: ${({ theme }) => theme.breakpoints.desktop}) {
-    justify-content: center;
-  }
-  
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-    padding: 0 20px;
-    
-    a, button {
-      width: 100% !important;
-      max-width: 280px !important;
-      text-align: center;
-      display: flex;
-      justify-content: center;
-      font-size: 13px !important;
-      padding: 14px 24px !important;
-    }
-  }
-`
-
-const HeroImage = styled(motion.div)`
-  position: relative;
-  
-  @media (max-width: ${({ theme }) => theme.breakpoints.desktop}) {
-    order: 1;
-  }
-  
-  @media (max-width: 768px) {
-    display: none !important;
-  }
-  
-  img {
-    width: 100%;
-    max-width: 500px;
-    margin: 0 auto;
-    display: block;
-    filter: drop-shadow(0 40px 80px rgba(0, 0, 0, 0.3));
-  }
-`
-
-const FloatingBadge = styled(motion.div)`
+const HeroBackground = styled(motion.div)`
   position: absolute;
-  background: ${({ theme }) => theme.colors.white};
-  padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.lg};
-  border-radius: ${({ theme }) => theme.borderRadius.xl};
-  box-shadow: ${({ theme }) => theme.shadows.xl};
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm};
+  inset: -100px;
   
-  &.top-left {
-    top: 10%;
-    left: -5%;
-  }
-  
-  &.bottom-right {
-    bottom: 15%;
-    right: 0;
-  }
-  
-  @media (max-width: ${({ theme }) => theme.breakpoints.desktop}) {
-    display: none;
-  }
-`
-
-const BadgeIcon = styled.span`
-  width: 40px;
-  height: 40px;
-  background: ${({ theme }) => theme.colors.accent.goldLight};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: ${({ theme }) => theme.colors.accent.goldDark};
-`
-
-const BadgeText = styled.div`
-  h4 {
-    font-size: ${({ theme }) => theme.fontSizes.sm};
-    font-weight: ${({ theme }) => theme.fontWeights.bold};
-    color: ${({ theme }) => theme.colors.text.primary};
-    margin: 0;
-  }
-  
-  span {
-    font-size: ${({ theme }) => theme.fontSizes.xs};
-    color: ${({ theme }) => theme.colors.text.light};
-  }
-`
-
-// Features Section
-const FeaturesSection = styled.section`
-  padding: 100px 40px;
-  background: #f4cbcd;
-`
-
-const FeaturesSectionContainer = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-`
-
-const FeaturesGrid = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 40px;
-  
-  @media (max-width: 1000px) {
-    flex-wrap: wrap;
-  }
-`
-
-const FeatureCard = styled(motion.div)`
-  text-align: center;
-  padding: 0;
-  background: transparent;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 320px;
-  position: relative;
-  
-  &:hover {
-    .feature-inner {
-      transform: translateY(-8px);
-      box-shadow: 0 20px 50px rgba(74, 44, 52, 0.25);
-    }
-    
-    .icon-wrapper {
-      transform: scale(1.05);
-    }
-  }
-`
-
-const FeatureCardInner = styled.div`
-  background: linear-gradient(145deg, #fff 0%, #f8e8e8 100%);
-  border-radius: 0 0 30px 30px;
-  padding: 100px 30px 40px;
-  width: 100%;
-  box-shadow: 0 10px 40px rgba(74, 44, 52, 0.15);
-  transition: all 0.4s ease;
-  position: relative;
-  margin-top: 80px;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: 30px;
-    right: 30px;
-    height: 4px;
-    background: linear-gradient(90deg, #C9A86C, #e8d4a8, #C9A86C);
-    border-radius: 2px;
-  }
-`
-
-const FeatureIconWrapper = styled.div`
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
-  transition: transform 0.4s ease;
-`
-
-const FeatureIconCircle = styled.div`
-  width: 160px;
-  height: 160px;
-  background: linear-gradient(145deg, #8b6b6b 0%, #6d4f4f 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fce4e4;
-  box-shadow: 0 8px 30px rgba(74, 44, 52, 0.3);
-  position: relative;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 8px;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-  }
-  
-  svg {
-    width: 70px;
-    height: 70px;
-    stroke-width: 1.5;
-  }
-`
-
-const FeatureTitle = styled.h3`
-  font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: 26px;
-  color: #4a2c34;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 400;
-`
-
-const FeatureSubtitle = styled.p`
-  font-family: ${({ theme }) => theme.fonts.accent};
-  font-size: 16px;
-  color: #8b6b6b;
-  margin-bottom: 24px;
-  font-style: italic;
-  font-weight: 400;
-  
-  &::after {
-    content: '?';
-    display: block;
-    font-size: 8px;
-    color: #C9A86C;
-    margin-top: 16px;
-    letter-spacing: 12px;
-    text-indent: 12px;
-  }
-`
-
-const FeatureButton = styled.button`
-  padding: 12px 36px;
-  background: transparent;
-  border: 2px solid #C9A86C;
-  border-radius: 30px;
-  color: #C9A86C;
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 500;
-  
-  &:hover {
-    background: #C9A86C;
-    color: #fff;
-    box-shadow: 0 4px 15px rgba(201, 168, 108, 0.4);
-  }
-`
-
-// Products Section - Auto Slider
-const ProductsSection = styled.section`
-  padding: 100px 0;
-  background: #f4cbcd;
-  overflow: hidden;
-  position: relative;
-  
-  @media (max-width: 768px) {
-    padding: 60px 0;
-  }
-`
-
-const ProductsSectionTitle = styled(motion.h2)`
-  font-family: 'Cormorant Garamond', 'IM Fell English', Georgia, serif;
-  font-size: 90px;
-  font-weight: 400;
-  color: #d4a5a6;
-  text-align: center;
-  margin-bottom: 60px;
-  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.15);
-  letter-spacing: 0.02em;
-  padding: 0 40px;
-  
-  @media (max-width: 768px) {
-    font-size: 36px;
-    margin-bottom: 30px;
-    padding: 0 20px;
-  }
-`
-
-const SliderContainer = styled.div`
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  
-  &::before,
   &::after {
     content: '';
     position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 150px;
-    z-index: 2;
-    pointer-events: none;
-  }
-  
-  &::before {
-    left: 0;
-    background: linear-gradient(90deg, #f4cbcd 0%, transparent 100%);
-  }
-  
-  &::after {
-    right: 0;
-    background: linear-gradient(90deg, transparent 0%, #f4cbcd 100%);
-  }
-  
-  @media (max-width: 768px) {
-    &::before,
-    &::after {
-      width: 30px;
-    }
-  }
-`
-
-const SliderTrack = styled(motion.div)`
-  display: flex;
-  gap: 40px;
-  width: fit-content;
-  
-  @media (max-width: 768px) {
-    gap: 15px;
-  }
-`
-
-const CategorySlide = styled(motion.div)`
-  flex-shrink: 0;
-  width: 350px;
-  text-align: center;
-  cursor: pointer;
-  
-  @media (max-width: 768px) {
-    width: 160px;
-  }
-`
-
-const CategoryImageWrapper = styled.div`
-  position: relative;
-  width: 100%;
-  aspect-ratio: 0.85;
-  border-radius: 30px;
-  overflow: hidden;
-  margin-bottom: 24px;
-  box-shadow: 0 15px 40px rgba(74, 44, 52, 0.2);
-  transition: all 0.4s ease;
-  background: linear-gradient(135deg, #f5ebe6 0%, #e8ddd5 100%);
-  
-  &::after {
-    content: '✦';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 50px;
-    color: #d4c4bc;
-    z-index: 0;
-  }
-  
-  &:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 25px 50px rgba(74, 44, 52, 0.3);
-    
-    img {
-      transform: scale(1.08);
-    }
-    
-    .slide-overlay {
-      opacity: 1;
-    }
-    
-    .slide-button {
-      opacity: 1;
-      transform: translate(-50%, -50%) scale(1);
-    }
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(10, 10, 10, 0.3) 0%,
+      rgba(10, 10, 10, 0.5) 50%,
+      rgba(10, 10, 10, 0.8) 100%
+    );
   }
   
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.5s ease;
+  }
+`
+
+const HeroContent = styled.div`
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 1000px;
+  padding: 0 ${({ theme }) => theme.spacing.xl};
+`
+
+const HeroTitle = styled.h1`
+  font-size: clamp(3rem, 10vw, ${({ theme }) => theme.fontSizes['8xl']});
+  color: ${({ theme }) => theme.colors.text.white};
+  font-weight: ${({ theme }) => theme.fontWeights.light};
+  line-height: 0.95;
+  margin-bottom: ${({ theme }) => theme.spacing.xl};
+`
+
+const HeroTitleAccent = styled.span`
+  display: block;
+  font-style: italic;
+  background: linear-gradient(
+    90deg,
+    ${({ theme }) => theme.colors.primary.accent} 0%,
+    ${({ theme }) => theme.colors.primary.main} 50%,
+    ${({ theme }) => theme.colors.primary.accent} 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: ${shimmer} 3s linear infinite;
+`
+
+const HeroDescription = styled(motion.p)`
+  font-size: ${({ theme }) => theme.fontSizes.xl};
+  color: ${({ theme }) => theme.colors.text.cream};
+  max-width: 600px;
+  margin: 0 auto ${({ theme }) => theme.spacing['2xl']};
+  line-height: 1.8;
+  opacity: 0.9;
+`
+
+const HeroButtons = styled(motion.div)`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing.lg};
+  justify-content: center;
+  flex-wrap: wrap;
+`
+
+const HeroButton = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.md};
+  padding: ${({ theme }) => `${theme.spacing.lg} ${theme.spacing['3xl']}`};
+  background: ${({ theme }) => theme.colors.primary.main};
+  color: ${({ theme }) => theme.colors.dark.main};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  transition: all 0.4s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: ${({ theme }) => theme.shadows.glow};
+  }
+`
+
+const HeroButtonOutline = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.md};
+  padding: ${({ theme }) => `${theme.spacing.lg} ${theme.spacing['3xl']}`};
+  background: transparent;
+  color: ${({ theme }) => theme.colors.text.white};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  backdrop-filter: blur(10px);
+  transition: all 0.4s ease;
+  
+  &:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.6);
+  }
+`
+
+const ScrollIndicator = styled(motion.div)`
+  position: absolute;
+  bottom: ${({ theme }) => theme.spacing['3xl']};
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.md};
+  color: ${({ theme }) => theme.colors.text.cream};
+  opacity: 0.5;
+`
+
+const ScrollText = styled.span`
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+`
+
+const ScrollDot = styled(motion.div)`
+  width: 6px;
+  height: 6px;
+  background: ${({ theme }) => theme.colors.primary.accent};
+  border-radius: 50%;
+`
+
+// ============ MARQUEE ============
+const MarqueeSection = styled.section`
+  background: ${({ theme }) => theme.colors.dark.main};
+  padding: ${({ theme }) => `${theme.spacing['2xl']} 0`};
+  overflow: hidden;
+  border-top: 1px solid rgba(255,255,255,0.05);
+`
+
+const MarqueeTrack = styled(motion.div)`
+  display: flex;
+  width: fit-content;
+`
+
+const MarqueeText = styled.span`
+  font-family: ${({ theme }) => theme.fonts.heading};
+  font-size: clamp(1.5rem, 4vw, ${({ theme }) => theme.fontSizes['3xl']});
+  font-weight: ${({ theme }) => theme.fontWeights.light};
+  color: ${({ theme }) => theme.colors.text.cream};
+  white-space: nowrap;
+  padding: 0 ${({ theme }) => theme.spacing['2xl']};
+  opacity: 0.3;
+  
+  .accent {
+    color: ${({ theme }) => theme.colors.primary.accent};
+    font-style: italic;
+  }
+`
+
+// ============ ABOUT SECTION ============
+const AboutSection = styled.section`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.desktop}) {
+    grid-template-columns: 1fr;
+  }
+`
+
+const AboutImageWrapper = styled.div`
+  position: relative;
+  overflow: hidden;
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.desktop}) {
+    height: 60vh;
+    min-height: 400px;
   }
   
-  @media (max-width: 768px) {
-    border-radius: 15px;
-    margin-bottom: 12px;
-    box-shadow: 0 8px 20px rgba(74, 44, 52, 0.15);
-    
-    .slide-button {
-      display: none;
-    }
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 `
 
-const SlideOverlay = styled.div`
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    transparent 50%,
-    rgba(74, 44, 52, 0.5) 100%
-  );
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  border-radius: 30px;
+const AboutContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: ${({ theme }) => `${theme.spacing['4xl']} ${theme.spacing['3xl']}`};
+  background: ${({ theme }) => theme.colors.background.cream};
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    padding: ${({ theme }) => `${theme.spacing['3xl']} ${theme.spacing.xl}`};
+  }
 `
 
-const SlideButton = styled.div`
+const AboutInner = styled.div`
+  max-width: 520px;
+`
+
+const SectionTag = styled(motion.span)`
+  display: inline-block;
+  font-size: 11px;
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: ${({ theme }) => theme.colors.primary.accent};
+  margin-bottom: ${({ theme }) => theme.spacing.xl};
+`
+
+const SectionTitle = styled(motion.h2)`
+  font-size: clamp(2rem, 4vw, ${({ theme }) => theme.fontSizes['4xl']});
+  color: ${({ theme }) => theme.colors.text.primary};
+  margin-bottom: ${({ theme }) => theme.spacing.xl};
+  line-height: 1.2;
+  
+  span {
+    font-style: italic;
+  }
+`
+
+const SectionText = styled(motion.p)`
+  font-size: ${({ theme }) => theme.fontSizes.md};
+  color: ${({ theme }) => theme.colors.text.secondary};
+  line-height: 1.9;
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
+`
+
+const TextLink = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  color: ${({ theme }) => theme.colors.text.primary};
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: ${({ theme }) => theme.spacing.lg};
+  transition: color 0.3s ease;
+  
+  &:hover {
+    color: ${({ theme }) => theme.colors.primary.accent};
+  }
+`
+
+// ============ FEATURES SECTION ============
+const FeaturesSection = styled(motion.section)`
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  background: ${({ theme }) => theme.colors.dark.main};
+  padding: ${({ theme }) => `${theme.spacing['6xl']} 0`};
+  overflow: hidden;
+`
+
+const FeaturesBgText = styled(motion.div)`
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) scale(0.8);
-  width: 70px;
-  height: 70px;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: all 0.4s ease;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  z-index: 10;
-  
-  &::before {
-    content: '→';
-    font-size: 24px;
-    color: #4a2c34;
-  }
-`
-
-const CategoryName = styled.h3`
+  transform: translate(-50%, -50%);
   font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: 28px;
-  font-weight: 400;
-  color: #4a2c34;
-  text-transform: capitalize;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
+  font-size: clamp(150px, 25vw, 400px);
+  font-weight: ${({ theme }) => theme.fontWeights.light};
+  color: rgba(255, 255, 255, 0.02);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  letter-spacing: -0.05em;
+`
+
+const FeaturesContent = styled.div`
+  position: relative;
+  z-index: 2;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 ${({ theme }) => theme.spacing['3xl']};
+  width: 100%;
   
-  &::before,
-  &::after {
-    content: '✦';
-    font-size: 10px;
-    color: #C9A86C;
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 14px;
-    gap: 6px;
-    
-    &::before,
-    &::after {
-      font-size: 6px;
-    }
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    padding: 0 ${({ theme }) => theme.spacing.xl};
   }
 `
 
+const FeaturesHeader = styled.div`
+  text-align: center;
+  margin-bottom: ${({ theme }) => theme.spacing['4xl']};
+`
 
+const FeaturesTitle = styled(motion.h2)`
+  font-size: clamp(2.5rem, 6vw, ${({ theme }) => theme.fontSizes['5xl']});
+  color: ${({ theme }) => theme.colors.text.white};
+  font-weight: ${({ theme }) => theme.fontWeights.light};
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
+  
+  span {
+    color: ${({ theme }) => theme.colors.primary.accent};
+    font-style: italic;
+  }
+`
 
-// Promo Section - New Design
-const PromoSection = styled.section`
-  padding: 100px 40px;
-  background: linear-gradient(135deg, #f5e6e0 0%, #e8d4cc 50%, #dcc4bc 100%);
+const FeaturesSubtitle = styled(motion.p)`
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  color: ${({ theme }) => theme.colors.text.cream};
+  opacity: 0.5;
+  max-width: 500px;
+  margin: 0 auto;
+`
+
+const FeaturesGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: ${({ theme }) => theme.spacing.xl};
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.desktop}) {
+    grid-template-columns: 1fr;
+    gap: ${({ theme }) => theme.spacing['2xl']};
+    max-width: 500px;
+    margin: 0 auto;
+  }
+`
+
+const FeatureCard = styled(motion.div)`
   position: relative;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: ${({ theme }) => theme.borderRadius.xl};
+  padding: ${({ theme }) => theme.spacing['3xl']};
+  text-align: center;
+  transition: all 0.5s ease;
   overflow: hidden;
   
   &::before {
@@ -584,613 +369,514 @@ const PromoSection = styled.section`
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
-    background: 
-      radial-gradient(circle at 20% 80%, rgba(201, 168, 108, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(122, 74, 90, 0.1) 0%, transparent 50%);
-    pointer-events: none;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, ${({ theme }) => theme.colors.primary.accent}, transparent);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  
+  &:hover {
+    transform: translateY(-10px);
+    border-color: rgba(255,255,255,0.1);
+    background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
+    
+    &::before {
+      opacity: 1;
+    }
   }
 `
 
-const PromoContainer = styled.div`
-  max-width: 1100px;
-  margin: 0 auto;
+const FeatureIconWrapper = styled(motion.div)`
   position: relative;
-  z-index: 1;
-`
-
-const PromoCard = styled(motion.div)`
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 240, 235, 0.95) 100%);
-  border-radius: 40px;
-  padding: 60px;
-  box-shadow: 
-    0 30px 80px rgba(122, 74, 90, 0.15),
-    0 10px 30px rgba(0, 0, 0, 0.08);
-  display: grid;
-  grid-template-columns: 1fr 1.2fr;
-  gap: 60px;
-  align-items: center;
-  position: relative;
-  overflow: hidden;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    right: 20px;
-    bottom: 20px;
-    border: 1px solid rgba(201, 168, 108, 0.3);
-    border-radius: 30px;
-    pointer-events: none;
-  }
-  
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-    padding: 40px;
-  }
-`
-
-const PromoImageWrapper = styled(motion.div)`
-  position: relative;
-  
-  @media (max-width: 900px) {
-    order: 1;
-  }
-`
-
-const PromoImageFrame = styled.div`
-  position: relative;
-  padding: 20px;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: 2px solid #C9A86C;
-    border-radius: 30px;
-    transform: rotate(-3deg);
-    opacity: 0.5;
-  }
-  
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: 2px solid #7a4a5a;
-    border-radius: 30px;
-    transform: rotate(3deg);
-    opacity: 0.3;
-  }
-`
-
-const PromoImage = styled.div`
-  position: relative;
-  z-index: 1;
-  background: linear-gradient(135deg, #f5ebe6 0%, #e8ddd5 100%);
-  border-radius: 25px;
-  min-height: 300px;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto ${({ theme }) => theme.spacing['2xl']};
   display: flex;
   align-items: center;
   justify-content: center;
   
-  &::after {
-    content: '✦';
+  &::before {
+    content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 50px;
-    color: #d4c4bc;
-    z-index: 0;
+    inset: 0;
+    background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary.accent}20 0%, transparent 100%);
+    border-radius: 50%;
   }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 10px;
+    background: ${({ theme }) => theme.colors.dark.main};
+    border-radius: 50%;
+    border: 1px solid ${({ theme }) => theme.colors.primary.accent}40;
+  }
+`
+
+const FeatureIcon = styled.span`
+  position: relative;
+  z-index: 1;
+  font-size: 2.5rem;
+`
+
+const FeatureNumber = styled(motion.span)`
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  font-family: ${({ theme }) => theme.fonts.heading};
+  font-size: ${({ theme }) => theme.fontSizes['6xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.light};
+  color: ${({ theme }) => theme.colors.primary.accent};
+  opacity: 0.15;
+  font-style: italic;
+`
+
+const FeatureTitle = styled.h3`
+  font-size: ${({ theme }) => theme.fontSizes['2xl']};
+  color: ${({ theme }) => theme.colors.text.white};
+  font-weight: ${({ theme }) => theme.fontWeights.light};
+  margin-bottom: ${({ theme }) => theme.spacing.md};
+  letter-spacing: 0.02em;
+`
+
+const FeatureText = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.md};
+  color: ${({ theme }) => theme.colors.text.cream};
+  opacity: 0.5;
+  line-height: 1.8;
+`
+
+const FeatureLine = styled(motion.div)`
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, ${({ theme }) => theme.colors.primary.accent}, transparent);
+`
+
+// ============ MENU PREVIEW ============
+const MenuSection = styled.section`
+  padding: ${({ theme }) => `${theme.spacing['5xl']} 0`};
+  background: ${({ theme }) => theme.colors.background.primary};
+`
+
+const MenuHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  max-width: 1600px;
+  margin: 0 auto ${({ theme }) => theme.spacing['3xl']};
+  padding: 0 ${({ theme }) => theme.spacing['3xl']};
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: ${({ theme }) => theme.spacing.xl};
+    padding: 0 ${({ theme }) => theme.spacing.xl};
+  }
+`
+
+const MenuGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.wide}) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    grid-template-columns: 1fr;
+  }
+`
+
+const MenuItem = styled(motion.div)`
+  position: relative;
+  aspect-ratio: 3/4;
+  overflow: hidden;
+  cursor: pointer;
   
   img {
     width: 100%;
-    max-width: 380px;
-    border-radius: 25px;
-    box-shadow: 0 20px 50px rgba(74, 44, 52, 0.25);
-    display: block;
-    margin: 0 auto;
-    position: relative;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 40%, rgba(10, 10, 10, 0.9) 100%);
     z-index: 1;
   }
-`
-
-const PromoContent = styled(motion.div)`
-  @media (max-width: 900px) {
-    order: 2;
-    text-align: center;
-  }
-`
-
-const PromoLabel = styled.span`
-  display: inline-block;
-  background: #7a4a5a;
-  color: #fff;
-  padding: 10px 28px;
-  border-radius: 30px;
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 12px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  margin-bottom: 24px;
-`
-
-const PromoTitle = styled.h2`
-  font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: 48px;
-  color: #4a2c34;
-  margin-bottom: 20px;
-  font-weight: 400;
-  line-height: 1.2;
   
-  @media (max-width: 600px) {
-    font-size: 36px;
+  &:hover img {
+    transform: scale(1.1);
   }
 `
 
-const PromoDescription = styled.p`
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 16px;
-  color: #6b5055;
-  line-height: 1.8;
-  margin-bottom: 32px;
-  max-width: 400px;
-  
-  @media (max-width: 900px) {
-    margin: 0 auto 32px;
-  }
-`
-
-const PromoPrice = styled.div`
-  display: flex;
-  align-items: baseline;
-  gap: 16px;
-  margin-bottom: 32px;
-  
-  @media (max-width: 900px) {
-    justify-content: center;
-  }
-`
-
-const OldPrice = styled.span`
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 20px;
-  color: #a08080;
-  text-decoration: line-through;
-`
-
-const NewPrice = styled.span`
-  font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: 42px;
-  color: #C9A86C;
-  font-weight: 400;
-`
-
-const PromoButton = styled.button`
-  padding: 18px 50px;
-  background: linear-gradient(135deg, #C9A86C 0%, #b89a5a 100%);
-  border: none;
-  border-radius: 35px;
-  color: #fff;
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 25px rgba(201, 168, 108, 0.4);
-  
-  &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 35px rgba(201, 168, 108, 0.5);
-  }
-`
-
-const SliderNavigation = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-  margin-top: 50px;
-`
-
-const SliderButton = styled.button`
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: #fff;
-  border: 2px solid rgba(201, 168, 108, 0.3);
-  color: #7a4a5a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  
-  &:hover {
-    background: #C9A86C;
-    border-color: #C9A86C;
-    color: #fff;
-    transform: scale(1.08);
-  }
-`
-
-const SliderDots = styled.div`
-  display: flex;
-  gap: 12px;
-  align-items: center;
-`
-
-const SliderDot = styled.button<{ $active: boolean }>`
-  width: ${({ $active }) => $active ? '32px' : '12px'};
-  height: 12px;
-  border-radius: 6px;
-  background: ${({ $active }) => $active ? '#C9A86C' : 'rgba(122, 74, 90, 0.25)'};
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    background: ${({ $active }) => $active ? '#C9A86C' : 'rgba(122, 74, 90, 0.4)'};
-  }
-`
-
-const PromoDecor = styled.div`
+const MenuItemInfo = styled.div`
   position: absolute;
-  font-size: 14px;
-  color: #C9A86C;
-  letter-spacing: 8px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: ${({ theme }) => theme.spacing['2xl']};
+  z-index: 2;
+`
+
+const MenuItemCategory = styled.span`
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: ${({ theme }) => theme.colors.primary.accent};
+  margin-bottom: ${({ theme }) => theme.spacing.sm};
+  display: block;
+`
+
+const MenuItemName = styled.h3`
+  font-size: ${({ theme }) => theme.fontSizes['2xl']};
+  color: ${({ theme }) => theme.colors.text.white};
+  font-weight: ${({ theme }) => theme.fontWeights.light};
+  margin-bottom: ${({ theme }) => theme.spacing.sm};
+`
+
+const MenuItemPrice = styled.span`
+  font-family: ${({ theme }) => theme.fonts.heading};
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  color: ${({ theme }) => theme.colors.text.cream};
+  font-style: italic;
+`
+
+// ============ CTA SECTION ============
+const CTASection = styled.section`
+  position: relative;
+  padding: ${({ theme }) => `${theme.spacing['6xl']} ${theme.spacing['3xl']}`};
+  background: ${({ theme }) => theme.colors.background.cream};
+  text-align: center;
   
-  &.top-left {
-    top: 30px;
-    left: 40px;
-  }
-  
-  &.bottom-right {
-    bottom: 30px;
-    right: 40px;
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    padding: ${({ theme }) => `${theme.spacing['4xl']} ${theme.spacing.xl}`};
   }
 `
 
-// Sample data
-const promoSlides = [
-  {
-    id: 1,
-    label: 'Хит сезона',
-    title: 'Торт "Matcha Bliss"',
-    description: 'Изысканный торт с нежнейшим кремом матча, белым шоколадом и хрустящим слоем из лесных орехов. Настоящий вкусовой шедевр в каждом кусочке.',
-    oldPrice: '320 000 сум',
-    newPrice: '259 000 сум',
-    image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500',
-  },
-  {
-    id: 2,
-    label: 'Новинка',
-    title: 'Тартлет "Сан-Тропе"',
-    description: 'Классический французский тартлет с лёгким кремом маскарпоне и свежайшими ягодами из Прованса. Подаётся с ванильным соусом.',
-    oldPrice: '280 000 сум',
-    newPrice: '229 000 сум',
-    image: 'https://images.unsplash.com/photo-1524351199678-941a58a3df50?w=500',
-  },
-  {
-    id: 3,
-    label: 'Топ продаж',
-    title: 'Набор макарон',
-    description: 'Ассорти из 6 макарон с лучшими вкусами: малина, фисташка, карамель, шоколад, манго и роза. Идеальный подарок.',
-    oldPrice: '180 000 сум',
-    newPrice: '149 000 сум',
-    image: 'https://images.unsplash.com/photo-1525059696034-4967a8e1dca2?w=500',
-  },
-]
-const features = [
-  {
-    icon: <Sparkles size={60} />,
-    title: 'Качество',
-    subtitle: 'Только лучшее',
-    description: 'Используем только лучшие ингредиенты премиального качества.',
-  },
-  {
-    icon: <ChefHat size={60} />,
-    title: 'Мастерство',
-    subtitle: 'Профессионализм',
-    description: 'Наши кондитеры — профессионалы с многолетним опытом и безупречной репутацией.',
-  },
-  {
-    icon: <Heart size={60} />,
-    title: 'С любовью',
-    subtitle: 'В каждой детали',
-    description: 'Каждый десерт создаётся с душой и вниманием к каждой детали.',
-  },
-]
+const CTAContent = styled(motion.div)`
+  max-width: 700px;
+  margin: 0 auto;
+`
 
-const categorySlides = [
-  {
-    id: 1,
-    name: 'Cakes',
-    slug: 'cakes',
-    image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500',
-  },
-  {
-    id: 2,
-    name: 'Muffins',
-    slug: 'pastries',
-    image: 'https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=500',
-  },
-  {
-    id: 3,
-    name: 'Cookies',
-    slug: 'cookies',
-    image: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=500',
-  },
-  {
-    id: 4,
-    name: 'Pastries',
-    slug: 'pastries',
-    image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=500',
-  },
-  {
-    id: 5,
-    name: 'Eclairs',
-    slug: 'eclairs',
-    image: 'https://images.unsplash.com/photo-1525059696034-4967a8e1dca2?w=500',
-  },
-  {
-    id: 6,
-    name: 'Macarons',
-    slug: 'macarons',
-    image: 'https://images.unsplash.com/photo-1569864358642-9d1684040f43?w=500',
-  },
-]
-
-// Duplicate slides for infinite scroll effect
-const infiniteSlides = [...categorySlides, ...categorySlides, ...categorySlides]
-
-export const Home: React.FC = () => {
-  const [currentSlide, setCurrentSlide] = useState(0)
-  const navigate = useNavigate()
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % promoSlides.length)
+const CTATitle = styled.h2`
+  font-size: clamp(2rem, 5vw, ${({ theme }) => theme.fontSizes['4xl']});
+  color: ${({ theme }) => theme.colors.text.primary};
+  margin-bottom: ${({ theme }) => theme.spacing.xl};
+  
+  span { 
+    font-style: italic; 
   }
+`
 
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + promoSlides.length) % promoSlides.length)
+const CTAButton = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.md};
+  padding: ${({ theme }) => `${theme.spacing.lg} ${theme.spacing['3xl']}`};
+  background: ${({ theme }) => theme.colors.dark.main};
+  color: ${({ theme }) => theme.colors.text.white};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  transition: all 0.4s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: ${({ theme }) => theme.shadows.xl};
   }
+`
 
-  const handleCategoryClick = (slug: string) => {
-    navigate(`/menu?category=${slug}`)
-  }
-
+// ============ COMPONENT ============
+const Home: React.FC = () => {
+  // Parallax для Hero
+  const heroRef = useRef<HTMLElement>(null)
+  const { scrollYProgress: heroProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
+  })
+  const heroY = useTransform(heroProgress, [0, 1], [0, 200])
+  const heroScale = useTransform(heroProgress, [0, 1], [1, 1.1])
+  const heroOpacity = useTransform(heroProgress, [0, 0.8], [1, 0])
+  
+  const aboutRef = useRef<HTMLElement>(null)
+  const aboutInView = useInView(aboutRef, { once: true, margin: "-100px" })
+  
+  // Parallax для Features
+  const featuresRef = useRef<HTMLElement>(null)
+  const { scrollYProgress: featuresProgress } = useScroll({
+    target: featuresRef,
+    offset: ["start end", "end start"]
+  })
+  const featuresBgY = useTransform(featuresProgress, [0, 1], [-100, 100])
+  const featuresBgScale = useTransform(featuresProgress, [0, 0.5, 1], [0.8, 1, 1.2])
+  
+  const menuItems = [
+    { name: 'Signature Latte', category: 'Coffee', price: '45,000 сум', image: 'https://images.unsplash.com/photo-1534778101976-62847782c213?w=800&q=80' },
+    { name: 'Avocado Toast', category: 'Breakfast', price: '68,000 сум', image: 'https://images.unsplash.com/photo-1603046891726-36bfd957e0bf?w=800&q=80' },
+    { name: 'Berry Pancakes', category: 'Breakfast', price: '58,000 сум', image: 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=800&q=80' },
+    { name: 'Croissant', category: 'Bakery', price: '35,000 сум', image: 'https://images.unsplash.com/photo-1623334044303-241021148842?w=800&q=80' },
+  ]
+  
+  const features = [
+    { icon: '☕', num: '01', title: 'Specialty Coffee', text: 'Carefully sourced beans, expertly roasted, crafted with precision.' },
+    { icon: '🍳', num: '02', title: 'Artisan Kitchen', text: 'From signature breakfasts to decadent desserts — culinary art.' },
+    { icon: '✨', num: '03', title: 'Warm Atmosphere', text: 'A space designed to inspire connection and creativity.' },
+  ]
+  
   return (
     <>
-      {/* Hero Section */}
-      <HeroSection>
-        <HeroContainer>
-          <HeroContent>
-            <HeroTitle
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              Bake the<br />
-              World a<br />
-              <span>Better Place</span>
+      {/* HERO */}
+      <HeroSection ref={heroRef}>
+        <HeroBackground style={{ y: heroY, scale: heroScale }}>
+          <img src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=1920&q=80" alt="" />
+        </HeroBackground>
+        
+        <motion.div style={{ opacity: heroOpacity }}>
+        <HeroContent>
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+          >
+            <HeroTitle>
+              Where Coffee<br />
+              <HeroTitleAccent>Meets Art</HeroTitleAccent>
             </HeroTitle>
-            <HeroSlogan
+          </motion.div>
+          
+          <HeroDescription
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 0.9, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+          >
+            Welcome to Socials — a sanctuary for coffee lovers and food enthusiasts. 
+            Experience the perfect blend of exceptional flavors and warm hospitality.
+          </HeroDescription>
+          
+          <HeroButtons
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+          >
+            <HeroButton to="/menu">Explore Menu</HeroButton>
+            <HeroButtonOutline to="/reservation">Reserve Table</HeroButtonOutline>
+          </HeroButtons>
+        </HeroContent>
+        </motion.div>
+        
+        <ScrollIndicator
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.5 }}
+          transition={{ delay: 1 }}
+        >
+          <ScrollText>Scroll</ScrollText>
+          <ScrollDot
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          />
+        </ScrollIndicator>
+      </HeroSection>
+      
+      {/* MARQUEE */}
+      <MarqueeSection>
+        <MarqueeTrack
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+        >
+          {[...Array(4)].map((_, i) => (
+            <MarqueeText key={i}>
+              Specialty Coffee <span className="accent">✦</span> Artisan Bakery <span className="accent">✦</span> Signature Breakfast <span className="accent">✦</span> 
+            </MarqueeText>
+          ))}
+        </MarqueeTrack>
+      </MarqueeSection>
+      
+      {/* ABOUT */}
+      <AboutSection ref={aboutRef}>
+        <AboutImageWrapper>
+          <motion.img 
+            src="https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?w=1200&q=80" 
+            alt=""
+            initial={{ scale: 1.2 }}
+            animate={aboutInView ? { scale: 1 } : {}}
+            transition={{ duration: 1.2 }}
+          />
+        </AboutImageWrapper>
+        
+        <AboutContent>
+          <AboutInner>
+            <SectionTag
+              initial={{ opacity: 0, x: -20 }}
+              animate={aboutInView ? { opacity: 1, x: 0 } : {}}
+              transition={{ duration: 0.6 }}
+            >
+              Our Story
+            </SectionTag>
+            
+            <SectionTitle
               initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
+              animate={aboutInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.8, delay: 0.1 }}
+            >
+              Crafted with <span>Passion</span>, Served with Love
+            </SectionTitle>
+            
+            <SectionText
+              initial={{ opacity: 0, y: 30 }}
+              animate={aboutInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              Откройте для себя мир изысканных десертов, 
-              где каждое блюдо — настоящее произведение искусства.
-            </HeroSlogan>
-            <HeroButtons
+              Founded in 2019 by Davron Hamidov and Ziyovuddin Alikhonov, 
+              Socials Cafe has become one of Tashkent's most beloved destinations. 
+              Part of the Memories Group family.
+            </SectionText>
+            
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={aboutInView ? { opacity: 1 } : {}}
+              transition={{ duration: 0.8, delay: 0.3 }}
+            >
+              <TextLink to="/contact">Discover Our Story →</TextLink>
+            </motion.div>
+          </AboutInner>
+        </AboutContent>
+      </AboutSection>
+      
+      {/* FEATURES */}
+      <FeaturesSection ref={featuresRef}>
+        <FeaturesBgText style={{ y: featuresBgY, scale: featuresBgScale }}>
+          SOCIALS
+        </FeaturesBgText>
+        
+        <FeaturesContent>
+          <FeaturesHeader>
+            <motion.div
               initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
             >
-              <LinkButton to="/menu" variant="gold" size="lg">
-                Смотреть меню
-              </LinkButton>
-              <LinkButton to="/reservation" variant="outline" size="lg" style={{ borderColor: 'white', color: 'white' }}>
-                Забронировать
-              </LinkButton>
-            </HeroButtons>
-          </HeroContent>
+              <SectionTag style={{ color: '#C9A87C' }}>Why Choose Us</SectionTag>
+            </motion.div>
+            <FeaturesTitle
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.1 }}
+            >
+              Crafting <span>Moments</span> of Joy
+            </FeaturesTitle>
+            <FeaturesSubtitle
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 0.5, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              Every cup tells a story, every dish is a masterpiece
+            </FeaturesSubtitle>
+          </FeaturesHeader>
           
-          <HeroImage
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.3 }}
-          >
-            <img 
-              src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=600" 
-              alt="Праздничный торт"
-              onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
-            />
-            <FloatingBadge 
-              className="top-left"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.8 }}
-            >
-              <BadgeIcon><Gift size={20} /></BadgeIcon>
-              <BadgeText>
-                <h4>Доставка</h4>
-                <span>Бесплатно от 200 000</span>
-              </BadgeText>
-            </FloatingBadge>
-            <FloatingBadge 
-              className="bottom-right"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 1 }}
-            >
-              <BadgeIcon><Star size={20} /></BadgeIcon>
-              <BadgeText>
-                <h4>4.9 ★</h4>
-                <span>2000+ отзывов</span>
-              </BadgeText>
-            </FloatingBadge>
-          </HeroImage>
-        </HeroContainer>
-      </HeroSection>
-
-      {/* Features Section */}
-      <FeaturesSection>
-        <FeaturesSectionContainer>
           <FeaturesGrid>
-            {features.map((feature, index) => (
+            {features.map((feature, i) => (
               <FeatureCard
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                key={feature.num}
+                initial={{ opacity: 0, y: 60, rotateX: -15 }}
+                whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
+                transition={{ duration: 0.8, delay: i * 0.2, ease: [0.16, 1, 0.3, 1] }}
               >
-                <FeatureIconWrapper className="icon-wrapper">
-                  <FeatureIconCircle>{feature.icon}</FeatureIconCircle>
+                <FeatureNumber>{feature.num}</FeatureNumber>
+                <FeatureIconWrapper
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  whileInView={{ scale: 1, opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: i * 0.2 + 0.3, type: "spring" }}
+                >
+                  <FeatureIcon>{feature.icon}</FeatureIcon>
                 </FeatureIconWrapper>
-                <FeatureCardInner className="feature-inner">
-                  <FeatureTitle>{feature.title}</FeatureTitle>
-                  <FeatureSubtitle>{feature.subtitle}</FeatureSubtitle>
-                  <FeatureButton>Подробнее</FeatureButton>
-                </FeatureCardInner>
+                <FeatureTitle>{feature.title}</FeatureTitle>
+                <FeatureText>{feature.text}</FeatureText>
+                <FeatureLine
+                  initial={{ width: 0, opacity: 0 }}
+                  whileInView={{ width: 60, opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.8, delay: i * 0.2 + 0.5 }}
+                />
               </FeatureCard>
             ))}
           </FeaturesGrid>
-        </FeaturesSectionContainer>
+        </FeaturesContent>
       </FeaturesSection>
-
-      {/* Promo Section */}
-      <PromoSection>
-        <PromoContainer>
-          <PromoCard
-            initial={{ opacity: 0, y: 40 }}
+      
+      {/* MENU */}
+      <MenuSection>
+        <MenuHeader>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <PromoDecor className="top-left">? ? ?</PromoDecor>
-            <PromoDecor className="bottom-right">? ? ?</PromoDecor>
-            
-            <AnimatePresence mode="wait">
-              <PromoImageWrapper
-                key={`image-${currentSlide}`}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.4 }}
-              >
-                <PromoImageFrame>
-                  <PromoImage>
-                    <img 
-                      src={promoSlides[currentSlide].image} 
-                      alt={promoSlides[currentSlide].title}
-                      onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
-                    />
-                  </PromoImage>
-                </PromoImageFrame>
-              </PromoImageWrapper>
-            </AnimatePresence>
-            
-            <AnimatePresence mode="wait">
-              <PromoContent
-                key={`content-${currentSlide}`}
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -30 }}
-                transition={{ duration: 0.4 }}
-              >
-                <PromoLabel>{promoSlides[currentSlide].label}</PromoLabel>
-                <PromoTitle>{promoSlides[currentSlide].title}</PromoTitle>
-                <PromoDescription>
-                  {promoSlides[currentSlide].description}
-                </PromoDescription>
-                <PromoPrice>
-                  <OldPrice>{promoSlides[currentSlide].oldPrice}</OldPrice>
-                  <NewPrice>{promoSlides[currentSlide].newPrice}</NewPrice>
-                </PromoPrice>
-                <PromoButton>Заказать сейчас</PromoButton>
-              </PromoContent>
-            </AnimatePresence>
-          </PromoCard>
-          
-          <SliderNavigation>
-            <SliderButton onClick={prevSlide}>
-              <ChevronLeft size={24} />
-            </SliderButton>
-            <SliderDots>
-              {promoSlides.map((_, index) => (
-                <SliderDot 
-                  key={index} 
-                  $active={index === currentSlide}
-                  onClick={() => setCurrentSlide(index)}
-                />
-              ))}
-            </SliderDots>
-            <SliderButton onClick={nextSlide}>
-              <ChevronRight size={24} />
-            </SliderButton>
-          </SliderNavigation>
-        </PromoContainer>
-      </PromoSection>
-
-      {/* Products Section - Auto Slider */}
-      <ProductsSection>
-        <ProductsSectionTitle
-          initial={{ opacity: 0, y: 20 }}
+            <SectionTag>The Menu</SectionTag>
+            <SectionTitle>Taste the <span>Difference</span></SectionTitle>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <TextLink to="/menu">View Full Menu →</TextLink>
+          </motion.div>
+        </MenuHeader>
+        
+        <MenuGrid>
+          {menuItems.map((item, i) => (
+            <MenuItem
+              key={item.name}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+            >
+              <img src={item.image} alt={item.name} />
+              <MenuItemInfo>
+                <MenuItemCategory>{item.category}</MenuItemCategory>
+                <MenuItemName>{item.name}</MenuItemName>
+                <MenuItemPrice>{item.price}</MenuItemPrice>
+              </MenuItemInfo>
+            </MenuItem>
+          ))}
+        </MenuGrid>
+      </MenuSection>
+      
+      {/* CTA */}
+      <CTASection>
+        <CTAContent
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
         >
-          Our Product
-        </ProductsSectionTitle>
-        
-        <SliderContainer>
-          <SliderTrack
-            animate={{
-              x: [0, -(categorySlides.length * 390)],
-            }}
-            transition={{
-              x: {
-                duration: 25,
-                repeat: Infinity,
-                ease: "linear",
-              },
-            }}
-          >
-            {infiniteSlides.map((category, index) => (
-              <CategorySlide 
-                key={`${category.id}-${index}`}
-                onClick={() => handleCategoryClick(category.slug)}
-              >
-                <CategoryImageWrapper>
-                  <img 
-                    src={category.image} 
-                    alt={category.name} 
-                    loading="lazy"
-                    onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
-                  />
-                  <SlideOverlay className="slide-overlay" />
-                  <SlideButton className="slide-button" />
-                </CategoryImageWrapper>
-                <CategoryName>{category.name}</CategoryName>
-              </CategorySlide>
-            ))}
-          </SliderTrack>
-        </SliderContainer>
-      </ProductsSection>
+          <SectionTag>Reserve</SectionTag>
+          <CTATitle>
+            Ready for an <span>Unforgettable</span> Experience?
+          </CTATitle>
+          <CTAButton to="/reservation">Book Your Table</CTAButton>
+        </CTAContent>
+      </CTASection>
     </>
   )
 }
 
+export default Home

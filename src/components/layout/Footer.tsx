@@ -1,481 +1,221 @@
-import { useState } from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import { Instagram, Send, MessageCircle, MapPin, Phone, Mail, ChevronRight } from 'lucide-react'
 
 const FooterWrapper = styled.footer`
-  background: linear-gradient(135deg, #5a3545 0%, #4a2c34 100%);
-  color: #fff;
-  position: relative;
-  overflow: hidden;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #C9A86C 0%, #e8d4a8 50%, #C9A86C 100%);
-  }
+  background: ${({ theme }) => theme.colors.dark.main};
+  color: ${({ theme }) => theme.colors.text.cream};
 `
 
 const FooterTop = styled.div`
-  padding: 50px 40px 40px;
-  position: relative;
+  padding: ${({ theme }) => `${theme.spacing['4xl']} ${theme.spacing['3xl']}`};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.dividerLight};
   
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(201, 168, 108, 0.4), transparent);
-  }
-  
-  @media (max-width: 768px) {
-    padding: 40px 20px 30px;
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    padding: ${({ theme }) => `${theme.spacing['3xl']} ${theme.spacing.xl}`};
   }
 `
 
 const FooterContainer = styled.div`
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
-`
-
-const FooterGrid = styled.div`
   display: grid;
-  grid-template-columns: 1.2fr 1fr 1fr 1.2fr;
-  gap: 35px;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: ${({ theme }) => theme.spacing['3xl']};
   
-  @media (max-width: 1000px) {
+  @media (max-width: ${({ theme }) => theme.breakpoints.desktop}) {
     grid-template-columns: 1fr 1fr;
-    gap: 30px;
+    gap: ${({ theme }) => theme.spacing['2xl']};
   }
   
-  @media (max-width: 600px) {
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
     grid-template-columns: 1fr;
-    gap: 25px;
   }
 `
 
-const FooterSection = styled.div``
-
-const SectionTitle = styled.h4`
-  font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: 16px;
-  color: #fff;
-  margin-bottom: 18px;
-  font-weight: 400;
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  
-  &::before {
-    content: '◆';
-    font-size: 6px;
-    color: #C9A86C;
-  }
-  
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -6px;
-    left: 0;
-    width: 30px;
-    height: 1px;
-    background: linear-gradient(90deg, #C9A86C, transparent);
-  }
-`
-
-// Logo Section
-const LogoSection = styled.div`
-  text-align: left;
+const FooterBrand = styled.div`
+  max-width: 350px;
 `
 
 const FooterLogo = styled(Link)`
-  font-family: 'IM Fell English', Georgia, serif;
-  font-size: 26px;
-  font-style: italic;
-  color: #fff;
-  text-decoration: none;
+  font-family: ${({ theme }) => theme.fonts.heading};
+  font-size: ${({ theme }) => theme.fontSizes['3xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.light};
+  color: ${({ theme }) => theme.colors.text.white};
   display: inline-block;
-  margin-bottom: 12px;
+  margin-bottom: ${({ theme }) => theme.spacing.xl};
   
-  span {
-    color: #C9A86C;
-  }
+  span { font-style: italic; }
 `
 
-const LogoDescription = styled.p`
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.7);
-  line-height: 1.6;
-  margin-bottom: 15px;
+const FooterDescription = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.text.cream};
+  opacity: 0.6;
+  line-height: 1.8;
+  margin-bottom: ${({ theme }) => theme.spacing.xl};
 `
 
-const ContactItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 8px;
-  
-  svg {
-    color: #C9A86C;
-    flex-shrink: 0;
-  }
-  
-  a {
-    color: rgba(255, 255, 255, 0.8);
-    text-decoration: none;
-    transition: color 0.3s ease;
-    
-    &:hover {
-      color: #C9A86C;
-    }
-  }
-`
-
-// Links Section
-const FooterLinks = styled.ul`
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-`
-
-const FooterLink = styled(Link)`
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.75);
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.3s ease;
-  
-  &::before {
-    content: '';
-    width: 0;
-    height: 1px;
-    background: #C9A86C;
-    transition: width 0.3s ease;
-  }
-  
-  &:hover {
-    color: #C9A86C;
-    transform: translateX(5px);
-    
-    &::before {
-      width: 15px;
-    }
-  }
-`
-
-// Social Section
 const SocialLinks = styled.div`
   display: flex;
-  gap: 10px;
-  margin-bottom: 12px;
+  gap: ${({ theme }) => theme.spacing.md};
 `
 
 const SocialLink = styled.a`
-  width: 40px;
-  height: 40px;
-  background: transparent;
-  border: 1px solid rgba(201, 168, 108, 0.4);
-  color: #C9A86C;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  position: relative;
-  
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    width: 6px;
-    height: 6px;
-    border: 1px solid #C9A86C;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  
-  &::before {
-    top: -3px;
-    left: -3px;
-    border-right: none;
-    border-bottom: none;
-  }
-  
-  &::after {
-    bottom: -3px;
-    right: -3px;
-    border-left: none;
-    border-top: none;
-  }
+  border: 1px solid ${({ theme }) => theme.colors.dividerLight};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  color: ${({ theme }) => theme.colors.text.cream};
+  font-size: 18px;
+  transition: all ${({ theme }) => theme.transitions.fast};
   
   &:hover {
-    background: #C9A86C;
-    color: #4a2c34;
-    border-color: #C9A86C;
-    transform: translateY(-3px);
-    
-    &::before,
-    &::after {
-      opacity: 1;
-    }
+    background: ${({ theme }) => theme.colors.primary.main};
+    border-color: ${({ theme }) => theme.colors.primary.main};
+    color: ${({ theme }) => theme.colors.dark.main};
   }
 `
 
-const SocialText = styled.p`
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
-  line-height: 1.5;
-`
+const FooterColumn = styled.div``
 
-// Newsletter Section
-const NewsletterForm = styled.form`
-  margin-bottom: 12px;
-`
-
-const InputWrapper = styled.div`
-  display: flex;
-  border: 1px solid rgba(201, 168, 108, 0.4);
-  background: rgba(255, 255, 255, 0.05);
-  transition: all 0.3s ease;
-  
-  &:focus-within {
-    border-color: #C9A86C;
-    background: rgba(255, 255, 255, 0.1);
-  }
-`
-
-const NewsletterInput = styled.input`
-  flex: 1;
-  padding: 10px 14px;
-  border: none;
-  background: transparent;
-  color: #fff;
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 13px;
-  
-  &::placeholder {
-    color: rgba(255, 255, 255, 0.5);
-    font-style: italic;
-  }
-  
-  &:focus {
-    outline: none;
-  }
-`
-
-const NewsletterButton = styled.button`
-  padding: 10px 18px;
-  background: linear-gradient(135deg, #C9A86C 0%, #b89a5a 100%);
-  border: none;
-  color: #4a2c34;
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 12px;
-  font-weight: 600;
+const FooterColumnTitle = styled.h4`
+  font-size: 11px;
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  letter-spacing: 0.2em;
+  color: ${({ theme }) => theme.colors.primary.accent};
+  margin-bottom: ${({ theme }) => theme.spacing.xl};
+`
+
+const FooterLinks = styled.ul`
+  list-style: none;
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.md};
+`
+
+const FooterLink = styled(Link)`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.text.cream};
+  opacity: 0.6;
+  transition: opacity ${({ theme }) => theme.transitions.fast};
   
-  &:hover {
-    background: linear-gradient(135deg, #d4b87a 0%, #C9A86C 100%);
-  }
+  &:hover { opacity: 1; }
 `
 
-const NewsletterText = styled.p`
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
-  line-height: 1.5;
+const FooterExternalLink = styled.a`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.text.cream};
+  opacity: 0.6;
+  transition: opacity ${({ theme }) => theme.transitions.fast};
+  
+  &:hover { opacity: 1; }
 `
 
-// Footer Bottom
+const FooterInfo = styled.div`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.text.cream};
+  opacity: 0.6;
+  line-height: 2;
+`
+
 const FooterBottom = styled.div`
-  padding: 20px 40px;
+  padding: ${({ theme }) => `${theme.spacing.xl} ${theme.spacing['3xl']}`};
   
-  @media (max-width: 768px) {
-    padding: 15px 20px;
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    padding: ${({ theme }) => `${theme.spacing.xl} ${theme.spacing.xl}`};
   }
 `
 
 const FooterBottomContent = styled.div`
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 20px;
   
-  @media (max-width: 600px) {
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
     flex-direction: column;
+    gap: ${({ theme }) => theme.spacing.lg};
     text-align: center;
   }
 `
 
 const Copyright = styled.p`
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.5);
-  
-  span {
-    color: #C9A86C;
-  }
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: ${({ theme }) => theme.colors.text.cream};
+  opacity: 0.4;
 `
 
-const BottomLinks = styled.div`
-  display: flex;
-  gap: 30px;
-`
-
-const BottomLink = styled(Link)`
-  font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.5);
-  text-decoration: none;
-  transition: color 0.3s ease;
+const MemoriesGroup = styled.a`
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: ${({ theme }) => theme.colors.text.cream};
+  opacity: 0.4;
+  transition: opacity ${({ theme }) => theme.transitions.fast};
   
-  &:hover {
-    color: #C9A86C;
-  }
-`
-
-const DecorElement = styled.div`
-  position: absolute;
-  font-size: 10px;
-  color: rgba(201, 168, 108, 0.2);
-  letter-spacing: 4px;
-  
-  &.top-right {
-    top: 30px;
-    right: 40px;
-  }
-  
-  &.bottom-left {
-    bottom: 80px;
-    left: 40px;
-  }
+  &:hover { opacity: 0.8; color: ${({ theme }) => theme.colors.primary.accent}; }
 `
 
 export const Footer: React.FC = () => {
-  const [email, setEmail] = useState('')
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log('Subscribe:', email)
-    setEmail('')
-  }
-
   return (
     <FooterWrapper>
-      <DecorElement className="top-right">✦ ✦ ✦ ✦ ✦</DecorElement>
-      <DecorElement className="bottom-left">✦ ✦ ✦ ✦ ✦</DecorElement>
-      
       <FooterTop>
         <FooterContainer>
-          <FooterGrid>
-            <LogoSection>
-              <FooterLogo to="/">
-                Socials
-              </FooterLogo>
-              <LogoDescription>
-                Изысканные десерты ручной работы, созданные с любовью и вниманием к каждой детали.
-              </LogoDescription>
-              <ContactItem>
-                <MapPin size={16} />
-                <span>г. Москва, ул. Арбат, д. 10</span>
-              </ContactItem>
-              <ContactItem>
-                <Phone size={16} />
-                <a href="tel:+74951234567">+7 (495) 123-45-67</a>
-              </ContactItem>
-              <ContactItem>
-                <Mail size={16} />
-                <a href="mailto:info@bellepatisserie.ru">info@bellepatisserie.ru</a>
-              </ContactItem>
-            </LogoSection>
-
-            <FooterSection>
-              <SectionTitle>Навигация</SectionTitle>
-              <FooterLinks>
-                <li><FooterLink to="/">Главная</FooterLink></li>
-                <li><FooterLink to="/menu">Меню</FooterLink></li>
-                <li><FooterLink to="/reservation">Бронирование</FooterLink></li>
-                <li><FooterLink to="/locations">Филиалы</FooterLink></li>
-                <li><FooterLink to="/contact">Контакты</FooterLink></li>
-              </FooterLinks>
-            </FooterSection>
-
-            <FooterSection>
-              <SectionTitle>Соцсети</SectionTitle>
-              <SocialLinks>
-                <SocialLink href="https://instagram.com" target="_blank" rel="noopener">
-                  <Instagram size={20} />
-                </SocialLink>
-                <SocialLink href="https://t.me" target="_blank" rel="noopener">
-                  <Send size={20} />
-                </SocialLink>
-                <SocialLink href="https://wa.me" target="_blank" rel="noopener">
-                  <MessageCircle size={20} />
-                </SocialLink>
-              </SocialLinks>
-              <SocialText>
-                Подписывайтесь на нас, чтобы быть<br />
-                в курсе новинок и акций
-              </SocialText>
-            </FooterSection>
-
-            <FooterSection>
-              <SectionTitle>Рассылка</SectionTitle>
-              <NewsletterForm onSubmit={handleSubmit}>
-                <InputWrapper>
-                  <NewsletterInput 
-                    type="email" 
-                    placeholder="Ваш email..."
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                  <NewsletterButton type="submit">
-                    <ChevronRight size={16} />
-                  </NewsletterButton>
-                </InputWrapper>
-              </NewsletterForm>
-              <NewsletterText>
-                Подпишитесь на нашу рассылку<br />
-                и получите скидку 10% на первый заказ
-              </NewsletterText>
-            </FooterSection>
-          </FooterGrid>
+          <FooterBrand>
+            <FooterLogo to="/">Socials <span>Cafe</span></FooterLogo>
+            <FooterDescription>
+              Where moments become memories. Part of the Memories Group, 
+              celebrating food, people, and connection since 2019.
+            </FooterDescription>
+            <SocialLinks>
+              <SocialLink href="https://instagram.com/socials_uz" target="_blank" rel="noopener noreferrer">📷</SocialLink>
+              <SocialLink href="https://t.me/socialscafe" target="_blank" rel="noopener noreferrer">✈️</SocialLink>
+            </SocialLinks>
+          </FooterBrand>
+          
+          <FooterColumn>
+            <FooterColumnTitle>Navigate</FooterColumnTitle>
+            <FooterLinks>
+              <li><FooterLink to="/">Home</FooterLink></li>
+              <li><FooterLink to="/menu">Menu</FooterLink></li>
+              <li><FooterLink to="/locations">Locations</FooterLink></li>
+              <li><FooterLink to="/contact">Contact</FooterLink></li>
+              <li><FooterLink to="/reservation">Reservation</FooterLink></li>
+            </FooterLinks>
+          </FooterColumn>
+          
+          <FooterColumn>
+            <FooterColumnTitle>Delivery</FooterColumnTitle>
+            <FooterLinks>
+              <li><FooterExternalLink href="https://wolt.com" target="_blank" rel="noopener noreferrer">Wolt</FooterExternalLink></li>
+              <li><FooterExternalLink href="https://yandex.uz/eda" target="_blank" rel="noopener noreferrer">Yandex Eats</FooterExternalLink></li>
+              <li><FooterExternalLink href="https://express24.uz" target="_blank" rel="noopener noreferrer">Express24</FooterExternalLink></li>
+            </FooterLinks>
+          </FooterColumn>
+          
+          <FooterColumn>
+            <FooterColumnTitle>Contact</FooterColumnTitle>
+            <FooterInfo>
+              <p>+998 99 901 44 33</p>
+              <p>info@socialscafe.uz</p>
+              <br />
+              <p>36 A Taras Shevchenko street</p>
+              <p>Tashkent, Uzbekistan</p>
+            </FooterInfo>
+          </FooterColumn>
         </FooterContainer>
       </FooterTop>
-
+      
       <FooterBottom>
         <FooterBottomContent>
-          <Copyright>
-            © 2024 <span>Socials</span>. Все права защищены.
-          </Copyright>
-          <BottomLinks>
-            <BottomLink to="/privacy">Политика конфиденциальности</BottomLink>
-            <BottomLink to="/terms">Условия использования</BottomLink>
-          </BottomLinks>
+          <Copyright>© {new Date().getFullYear()} Socials Cafe. All rights reserved.</Copyright>
+          <MemoriesGroup href="https://memoriesgroup.uz" target="_blank" rel="noopener noreferrer">
+            Part of Memories Group
+          </MemoriesGroup>
         </FooterBottomContent>
       </FooterBottom>
     </FooterWrapper>

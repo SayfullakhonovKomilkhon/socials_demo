@@ -1,25 +1,19 @@
 import { createGlobalStyle } from 'styled-components'
 
 export const GlobalStyles = createGlobalStyle`
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
+  
   *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
   }
-
+  
   html {
-    font-size: 16px;
     scroll-behavior: smooth;
-    
-    @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
-      font-size: 15px;
-    }
-    
-    @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-      font-size: 14px;
-    }
+    font-size: 16px;
   }
-
+  
   body {
     font-family: ${({ theme }) => theme.fonts.body};
     font-weight: ${({ theme }) => theme.fontWeights.normal};
@@ -30,121 +24,74 @@ export const GlobalStyles = createGlobalStyle`
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
   }
-
+  
   h1, h2, h3, h4, h5, h6 {
     font-family: ${({ theme }) => theme.fonts.heading};
-    font-weight: ${({ theme }) => theme.fontWeights.medium};
+    font-weight: ${({ theme }) => theme.fontWeights.light};
     line-height: ${({ theme }) => theme.lineHeights.tight};
-    color: ${({ theme }) => theme.colors.text.primary};
+    letter-spacing: -0.02em;
   }
-
-  h1 {
-    font-size: ${({ theme }) => theme.fontSizes['5xl']};
-    
-    @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
-      font-size: ${({ theme }) => theme.fontSizes['4xl']};
-    }
-  }
-
-  h2 {
-    font-size: ${({ theme }) => theme.fontSizes['4xl']};
-    
-    @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
-      font-size: ${({ theme }) => theme.fontSizes['3xl']};
-    }
-  }
-
-  h3 {
-    font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  }
-
-  h4 {
-    font-size: ${({ theme }) => theme.fontSizes.xl};
-  }
-
+  
   p {
-    margin-bottom: ${({ theme }) => theme.spacing.md};
-    
-    &:last-child {
-      margin-bottom: 0;
-    }
+    line-height: ${({ theme }) => theme.lineHeights.relaxed};
   }
-
+  
   a {
-    color: ${({ theme }) => theme.colors.accent.gold};
+    color: inherit;
     text-decoration: none;
-    transition: color ${({ theme }) => theme.transitions.fast};
-    
-    &:hover {
-      color: ${({ theme }) => theme.colors.accent.goldDark};
-    }
   }
-
+  
   button {
-    font-family: inherit;
+    font-family: ${({ theme }) => theme.fonts.body};
     cursor: pointer;
-    border: none;
-    outline: none;
-    background: none;
   }
-
-  input, textarea, select {
-    font-family: inherit;
-    font-size: inherit;
-  }
-
-  img {
+  
+  img, video {
     max-width: 100%;
     height: auto;
     display: block;
   }
-
-  ul, ol {
-    list-style: none;
-  }
-
-  /* Custom Scrollbar */
+  
+  /* Hide scrollbar but keep functionality */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 0px;
+    background: transparent;
   }
-
-  ::-webkit-scrollbar-track {
-    background: ${({ theme }) => theme.colors.background.secondary};
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: ${({ theme }) => theme.colors.primary.main};
-    border-radius: ${({ theme }) => theme.borderRadius.full};
-    
-    &:hover {
-      background: ${({ theme }) => theme.colors.primary.dark};
-    }
-  }
-
-  /* Selection */
+  
   ::selection {
-    background: ${({ theme }) => theme.colors.accent.gold};
-    color: ${({ theme }) => theme.colors.white};
+    background: ${({ theme }) => theme.colors.dark.main};
+    color: ${({ theme }) => theme.colors.text.white};
   }
-
-  /* Focus visible */
-  :focus-visible {
-    outline: 2px solid ${({ theme }) => theme.colors.accent.gold};
-    outline-offset: 2px;
+  
+  /* Smooth page transitions */
+  .page-transition-enter {
+    opacity: 0;
+    transform: translateY(20px);
   }
-
-  /* Utility classes */
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
+  
+  .page-transition-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(60px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
   }
 `
-

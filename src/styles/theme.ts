@@ -1,65 +1,67 @@
 export const theme = {
   colors: {
-    // Primary Rose/Pink palette (from Figma design)
+    // Dramatic, Sophisticated Palette
     primary: {
-      main: '#A76B5B',
-      light: '#C89B8E',
-      lighter: '#E8C4B8',
-      lightest: '#F5E6E0',
-      dark: '#8B4557',
-      darker: '#6E3344',
+      main: '#E8DED1',        // Warm cream
+      light: '#F5F0E8',
+      lighter: '#FAF8F5',
+      dark: '#D4C4B0',
+      accent: '#C9A87C',      // Warm gold accent
     },
-    // Accent Gold
-    accent: {
-      gold: '#C9A86C',
-      goldLight: '#E4D4A5',
-      goldDark: '#9A7B4F',
+    // Dark tones for drama
+    dark: {
+      main: '#0A0A0A',        // Near black
+      lighter: '#141414',
+      light: '#1E1E1E',
+      medium: '#2A2A2A',
     },
     // Backgrounds
     background: {
-      primary: '#F5E6E0',
-      secondary: '#EDD5CC',
-      card: '#DEB8A8',
-      cardHover: '#D4A898',
-      dark: '#8B4557',
-      gradient: 'linear-gradient(135deg, #8B4557 0%, #A76B5B 50%, #C89B8E 100%)',
+      primary: '#FDFCFA',     // Warm white
+      secondary: '#F8F6F3',
+      cream: '#F5F0E8',
+      dark: '#0A0A0A',
+      overlay: 'rgba(10, 10, 10, 0.85)',
     },
     // Text
     text: {
-      primary: '#4A2C34',
-      secondary: '#6E4A4A',
-      light: '#8B6B6B',
-      white: '#FFFFFF',
-      gold: '#C9A86C',
+      primary: '#0A0A0A',
+      secondary: '#3D3D3D',
+      light: '#6B6B6B',
+      muted: '#9A9A9A',
+      white: '#FDFCFA',
+      cream: '#E8DED1',
     },
-    // UI States
-    success: '#6B8E6B',
-    error: '#B85050',
-    warning: '#D4A555',
-    // Misc
+    // States
+    success: '#4A7C59',
+    error: '#C45B5B',
+    // Utility
     white: '#FFFFFF',
-    black: '#1A1A1A',
-    overlay: 'rgba(74, 44, 52, 0.7)',
+    black: '#000000',
+    divider: 'rgba(10, 10, 10, 0.08)',
+    dividerLight: 'rgba(253, 252, 250, 0.1)',
   },
   
   fonts: {
-    heading: '"Cormorant Garamond", "IM Fell English", Georgia, serif',
-    body: '"Inconsolata", sans-serif',
-    accent: '"Cormorant Garamond", "IM Fell English SC", Georgia, serif',
+    heading: '"Cormorant Garamond", "Playfair Display", Georgia, serif',
+    body: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+    accent: '"Cormorant Garamond", Georgia, serif',
   },
   
   fontSizes: {
-    xs: '0.75rem',
-    sm: '0.875rem',
-    md: '1rem',
-    lg: '1.125rem',
-    xl: '1.25rem',
-    '2xl': '1.5rem',
-    '3xl': '1.875rem',
-    '4xl': '2.25rem',
-    '5xl': '3rem',
-    '6xl': '3.75rem',
-    '7xl': '4.5rem',
+    xs: '0.75rem',      // 12px
+    sm: '0.875rem',     // 14px
+    md: '1rem',         // 16px
+    lg: '1.125rem',     // 18px
+    xl: '1.25rem',      // 20px
+    '2xl': '1.5rem',    // 24px
+    '3xl': '2rem',      // 32px
+    '4xl': '2.5rem',    // 40px
+    '5xl': '3.5rem',    // 56px
+    '6xl': '4.5rem',    // 72px
+    '7xl': '6rem',      // 96px
+    '8xl': '8rem',      // 128px
+    '9xl': '12rem',     // 192px
   },
   
   fontWeights: {
@@ -71,10 +73,11 @@ export const theme = {
   },
   
   lineHeights: {
+    none: 1,
     tight: 1.1,
-    snug: 1.25,
+    snug: 1.2,
     normal: 1.5,
-    relaxed: 1.75,
+    relaxed: 1.7,
   },
   
   spacing: {
@@ -87,41 +90,47 @@ export const theme = {
     '3xl': '4rem',
     '4xl': '6rem',
     '5xl': '8rem',
+    '6xl': '12rem',
+    '7xl': '16rem',
   },
   
   borderRadius: {
+    none: '0',
     sm: '4px',
     md: '8px',
     lg: '12px',
     xl: '16px',
     '2xl': '24px',
+    '3xl': '40px',
     full: '9999px',
   },
   
   shadows: {
-    sm: '0 1px 2px rgba(74, 44, 52, 0.05)',
-    md: '0 4px 6px rgba(74, 44, 52, 0.07)',
-    lg: '0 10px 15px rgba(74, 44, 52, 0.1)',
-    xl: '0 20px 25px rgba(74, 44, 52, 0.15)',
-    inner: 'inset 0 2px 4px rgba(74, 44, 52, 0.06)',
-    glow: '0 0 20px rgba(201, 168, 108, 0.3)',
+    sm: '0 2px 8px rgba(0, 0, 0, 0.04)',
+    md: '0 8px 30px rgba(0, 0, 0, 0.08)',
+    lg: '0 20px 50px rgba(0, 0, 0, 0.12)',
+    xl: '0 30px 70px rgba(0, 0, 0, 0.15)',
+    glow: '0 0 80px rgba(201, 168, 124, 0.3)',
   },
   
   transitions: {
-    fast: '0.15s ease',
-    normal: '0.3s ease',
-    slow: '0.5s ease',
-    spring: '0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+    fast: '0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+    normal: '0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+    slow: '0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+    slower: '0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+    smooth: '1.2s cubic-bezier(0.16, 1, 0.3, 1)',
   },
   
   breakpoints: {
-    mobile: '375px',
+    mobile: '480px',
     tablet: '768px',
     desktop: '1024px',
     wide: '1440px',
+    ultrawide: '1920px',
   },
   
   zIndex: {
+    base: 0,
     dropdown: 100,
     sticky: 200,
     modal: 300,
@@ -131,4 +140,3 @@ export const theme = {
 } as const
 
 export type Theme = typeof theme
-
